@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ET BURGER 2077 | Painel administrativo</title>
-<link rel="icon" type="image/png" href="./favicon-32.png">
+<link rel="icon" type="image/png" href="./logo.png">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0a1416">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -441,7 +441,7 @@ details.fold[open]>summary::after{content:"−"}
 
 </style>
 <script src="https://unpkg.com/@supabase/supabase-js@2.45.0"></script>
-</head>
+<style>.tbl-wrap{overflow-x:auto}.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid #363D48;text-align:right;white-space:nowrap}.tbl th:first-child,.tbl td:first-child{text-align:left}.tbl th{color:#AAB4C4;font-size:11px;letter-spacing:.06em}.tbl tr.tot td{font-weight:800;color:#F5C842}.tbl tr.muted td{color:#B7BEC9;font-style:italic}</style></head>
 <body>
 
 <div id="loginGate">
@@ -556,6 +556,7 @@ details.fold[open]>summary::after{content:"−"}
         <option value="supernova">Supernova (XCB) — X-Calabacon</option>
         <option value="parallax">Parallax (XSD) — X-Salada Duplo</option>
         <option value="sputnik">Sputnik (XBT) — X-Burger Triplo</option>
+        <option value="mothership">Mothership (XCD) — X-Calabresa Duplo</option>
       </select>
     </section>
 
@@ -565,7 +566,7 @@ details.fold[open]>summary::after{content:"−"}
       <div class="cost-form">
         <div><label for="campaignName">Nome da campanha</label><input id="campaignName" maxlength="80" placeholder="Ex.: Sextou ET"></div>
         <div><label for="campaignType">Tipo</label><select id="campaignType"><option value="burger">Hambúrguer avulso</option><option value="combo">Combo</option></select></div>
-        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="supernova">Supernova</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option></select></div>
+        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="supernova">Supernova</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option></select></div>
         <div><label for="campaignDiscountType">Desconto</label><select id="campaignDiscountType"><option value="percentual">Percentual (%)</option><option value="preco">Preço promocional (R$)</option></select></div>
         <div><label for="campaignValue">Valor</label><input id="campaignValue" type="number" min="0.01" step="0.01" value="10"></div>
         <div><label for="campaignBasePrice">Preço normal (R$)</label><input id="campaignBasePrice" type="number" min="0.01" step="0.01" placeholder="Ex.: 20,00"></div>
@@ -596,7 +597,7 @@ details.fold[open]>summary::after{content:"−"}
   <div class="panel active" id="panel-overview">
     <div class="kpi-top">
       <div class="seg" id="periodSeg" role="group" aria-label="Período">
-        <button type="button" data-p="day" class="on">Hoje</button><button type="button" data-p="week">Semana</button><button type="button" data-p="month">Mês</button><button type="button" data-p="date">Data</button>
+        <button type="button" data-p="day" class="on">Hoje</button><button type="button" data-p="week">Semana</button><button type="button" data-p="month">Mês</button><button type="button" data-p="date">Data</button><button type="button" data-p="more">Mais ▾</button>
       </div>
       <span class="pend-pill" id="kPendPill" hidden>⏳ <b id="kPend">0</b> pendente<span id="kPendS">s</span></span>
     </div>
@@ -612,12 +613,25 @@ details.fold[open]>summary::after{content:"−"}
         </div>
       </article>
     </div>
+    <section class="admin-box" id="yearCard">
+      <h3 style="margin:0 0 4px">📆 Faturamento do ano</h3>
+      <small id="yearRange" style="color:#B7BEC9"></small>
+      <div class="stat-grid" style="margin-top:10px"><div class="stat-box"><div class="k">FATURAMENTO</div><div class="v" id="yearRev">…</div></div><div class="stat-box"><div class="k">PEDIDOS</div><div class="v" id="yearOrd">…</div></div><div class="stat-box"><div class="k">TICKET MÉDIO</div><div class="v" id="yearAvg">…</div></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
+        <button class="refresh-btn" id="yearExport" type="button">⬇️ Exportar o ano (CSV)</button>
+        <label for="yearStart" style="font-size:12px;color:#B7BEC9">Início do ciclo</label><input id="yearStart" type="date" style="max-width:170px"><button class="refresh-btn" id="yearSave" type="button">Salvar</button>
+      </div>
+      <small style="display:block;margin-top:8px;color:#B7BEC9">O contador volta a zero sozinho quando o ciclo de 1 ano termina. Os pedidos continuam guardados no Supabase e no Histórico por mês. Exporte o CSV antes da virada para ter sua cópia.</small>
+      <div class="save-msg" id="yearMsg" aria-live="polite"></div>
+    </section>
     <details class="fold" id="foldFilter"><summary>🔎 Filtro e total do período</summary>
     <div class="admin-box cash-filter-card">
       <div class="cash-heading"><div><h2>💰 Caixa &amp; vendas</h2><p>Consulte o faturamento e acompanhe os pedidos recebidos.</p></div><div class="cash-icon" aria-hidden="true">📊</div></div>
       <div class="cash-filter-grid">
-        <div class="cash-field"><label for="orderPeriod">PERÍODO DA CONSULTA</label><select id="orderPeriod"><option value="day">Hoje</option><option value="date">Data específica</option><option value="week">Esta semana</option><option value="month">Este mês</option></select></div>
+        <div class="cash-field"><label for="orderPeriod">PERÍODO DA CONSULTA</label><select id="orderPeriod"><option value="day">Hoje</option><option value="date">Data específica</option><option value="week">Esta semana</option><option value="month">Este mês</option><option value="7d">Últimos 7 dias</option><option value="30d">Últimos 30 dias</option><option value="lastmonth">Mês passado</option><option value="year">Este ano</option><option value="range">Intervalo (de… até…)</option></select></div>
         <div class="cash-field"><label for="orderDate">📅 ESCOLHER DATA</label><input id="orderDate" type="date"></div>
+        <div class="cash-field" id="rangeBox" style="display:none;grid-column:1/-1"><label>📅 DE … ATÉ</label><div style="display:flex;gap:8px"><input id="rangeFrom" type="date" aria-label="Data inicial"><input id="rangeTo" type="date" aria-label="Data final"></div></div>
+        <div class="cash-field" style="grid-column:1/-1"><button class="refresh-btn" id="exportCsv" type="button">⬇️ Exportar pedidos do período (CSV)</button></div>
         <div class="cash-field" style="grid-column:1/-1"><button class="refresh-btn" id="refreshOrders">↻ Atualizar dados do caixa</button></div>
       </div>
     </div>
@@ -649,6 +663,8 @@ details.fold[open]>summary::after{content:"−"}
       <small style="display:block;margin-top:8px">Este é um resumo histórico separado, não são pedidos individuais e não altera os novos pedidos cadastrados.</small>
     </section>
     </details>
+    <details class="fold" open><summary>🏆 Mais vendidos do período</summary><div id="rankingBox"></div></details>
+    <details class="fold" id="foldMonthly"><summary>🗓️ Histórico por mês</summary><div id="monthlyBox"><div class="empty-msg">Abra para carregar.</div></div></details>
     <details class="fold" open><summary>🧾 Pedidos</summary>
     <div id="ordersList"></div>
     </details>
@@ -778,7 +794,7 @@ details.fold[open]>summary::after{content:"−"}
       note:"Combo desligado some do site." },
     { key:"fritas",  title:"🍟 Fritas",                    match: id => id.startsWith("fritas_"),
       note:"Fritas desligadas também saem dos combos (o preço do combo é recalculado)." },
-    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["roswell","area51","hangar18","voyager","supernova","parallax","sputnik"].includes(id) },
+    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["roswell","area51","hangar18","voyager","supernova","parallax","sputnik","mothership"].includes(id) },
     { key:"bebidas", title:"🥤 Bebidas",                   match: id => id.startsWith("refri") },
     { key:"outros",  title:"📦 Outros",                    match: () => true }
   ];
@@ -790,6 +806,7 @@ details.fold[open]>summary::after{content:"−"}
     { item_id:"combo_casal",      name:"Dupla Cósmica" },
     { item_id:"combo_tripulacao", name:"Tripulação" },
     { item_id:"combo_familia",    name:"Família Galáctica" },
+    { item_id:"mothership",        name:"MOTHERSHIP" },
     { item_id:"refri220",         name:"Refri Lata Mini (220 ml)" }  // item avulso: aparece em Bebidas e é criado no estoque ao ligar/desligar
   ];
   const COMBO_NAMES = Object.fromEntries(COMBO_ROWS.map(c => [c.item_id, c.name]));
@@ -1202,7 +1219,7 @@ on conflict (code) do nothing;
   //   manual       = { combo:{...}, burger:{...} }
   const DAYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const COMBO_LIST = [["individual","Combo Solo"],["casal","Dupla Cósmica"],["tripulacao","Tripulação"],["familia","Família Galáctica"]];
-  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["supernova","Supernova"],["parallax","Parallax"],["sputnik","Sputnik"]];
+  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["supernova","Supernova"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"]];
   const BURGER_DEFAULT_PRICE = { roswell:20, area51:22, hangar18:24, voyager:26, supernova:30, parallax:36, sputnik:42 };
   const LINE_KEY = "line:classica";
   const COMBO_LABEL = Object.fromEntries(COMBO_LIST);
@@ -1625,7 +1642,7 @@ on conflict (code) do nothing;
       if(/pix/.test(p)) pay.pix+=v; else if(/dinheiro|esp[eé]cie/.test(p)) pay.cash+=v; else if(/cart|d[eé]bito|cr[eé]dito|maquin/.test(p)) pay.card+=v;
     });
     const pending=orders.filter(o=>{const st=String(o.status||o.order_status||o.state||"").toLowerCase();return !st||/(pend|novo|receb|aguard|pending|new)/.test(st);}).length;
-    set("kLabel",({day:"Faturamento de hoje",week:"Faturamento da semana",month:"Faturamento do mês",date:"Faturamento da data"}[period]||"Faturamento"));
+    set("kLabel",({day:"Faturamento de hoje",week:"Faturamento da semana",month:"Faturamento do mês",date:"Faturamento da data","7d":"Faturamento dos últimos 7 dias","30d":"Faturamento dos últimos 30 dias",lastmonth:"Faturamento do mês passado",year:"Faturamento do ano",range:"Faturamento do intervalo"}[period]||"Faturamento"));
     set("kRevenue",fmt(total));set("kOrders",String(n));set("kAvg",fmt(n?total/n:0));
     set("kPix",fmt(pay.pix));set("kCash",fmt(pay.cash));set("kCard",fmt(pay.card));
     set("kPend",String(pending));set("kPendS",pending===1?"":"s");
@@ -1633,6 +1650,7 @@ on conflict (code) do nothing;
   }
   document.getElementById("periodSeg").addEventListener("click",e=>{
     const b=e.target.closest("button[data-p]");if(!b)return;
+    if(b.dataset.p==="more"){document.getElementById("foldFilter").open=true;document.getElementById("orderPeriod").focus();return;}
     document.querySelectorAll("#periodSeg button").forEach(x=>x.classList.toggle("on",x===b));
     const sel=document.getElementById("orderPeriod");sel.value=b.dataset.p;sel.dispatchEvent(new Event("change"));
     if(b.dataset.p==="date"){const f=document.getElementById("foldFilter");f.open=true;const d=document.getElementById("orderDate");d.style.display="block";d.focus();}
@@ -1703,6 +1721,7 @@ on conflict (code) do nothing;
       if(n.includes("supernova")) return "supernova";
       if(n.includes("parallax")) return "parallax";
       if(n.includes("sputnik")) return "sputnik";
+      if(n.includes("mothership")) return "mothership";
       if(n.includes("fritas") || n.includes("batata")) return "fritas";
       return null;
     };
@@ -1733,8 +1752,122 @@ on conflict (code) do nothing;
     box.insertAdjacentHTML("beforeend", `<div class="stat-list" style="border-color:var(--teal)"><h3>📈 Resultado estimado — ET BURGER 2077</h3><div class="stat-line"><span>Faturamento</span><b>${fmt(total)}</b></div><div class="stat-line"><span>Custo de insumos calculado</span><b>− ${fmt(knownCost)}</b></div><div class="stat-line"><span>Despesas lançadas no período</span><b>− ${expenseUnavailable?"indisponível":fmt(expenseTotal)}</b></div><div class="stat-line" style="font-size:16px"><span><strong>${expenseUnavailable?"Resultado parcial":"Resultado provisório"}</strong></span><b>${expenseUnavailable?"—":fmt(provisional)}</b></div><p class="cost-note">${esc(missingText)} ${expenseUnavailable?"Ative o módulo de custos no Supabase para consultar despesas.":"Estimativa gerencial, não substitui conciliação bancária nem inclui taxas não cadastradas."}</p></div>`);
   }
 
+  let lastOrders = [], lastRange = [null, null];
+  const TZ = "America/Santarem";
+  // Busca paginada: o Supabase devolve no máximo 1000 linhas por consulta
+  async function fetchOrders(start, end, cols){
+    const all = [], step = 1000;
+    for(let from = 0;; from += step){
+      let q = supabaseClient.from("orders").select(cols);
+      if(start) q = q.gte("created_at", start.toISOString());
+      if(end) q = q.lt("created_at", end.toISOString());
+      const { data, error } = await q.order("created_at", { ascending:false }).order("id", { ascending:false }).range(from, from+step-1);
+      if(error) return { data:null, error };
+      all.push(...data);
+      if(data.length < step) break;
+    }
+    return { data:all, error:null };
+  }
+  function renderRanking(orders){
+    const box = document.getElementById("rankingBox"), by = {};
+    (orders||[]).forEach(o => (Array.isArray(o.items) ? o.items : []).forEach(i => {
+      const q = Math.max(0, Number(i.qty)||0); if(!q) return;
+      const k = itemLabel(String(i.name||"Item")).replace(/\s*\((?:PROMO|Promo|promo)[^)]*\)\s*$/, "").trim() || "Item";
+      const r = by[k] || (by[k] = { q:0, v:0 }); r.q += q; r.v += q * Number(i.price||0);
+    }));
+    const rows = Object.entries(by).sort((a,b) => b[1].q - a[1].q || b[1].v - a[1].v);
+    if(!rows.length){ box.innerHTML = '<div class="empty-msg">Sem vendas neste período.</div>'; return; }
+    const sum = rows.reduce((s,[,r]) => s + r.v, 0) || 1;
+    box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><tr><th>#  ITEM</th><th>QTD</th><th>FATURAMENTO</th><th>%</th></tr>' +
+      rows.map(([k,r],n) => `<tr><td>${n+1}. ${esc(k)}</td><td>${r.q}</td><td>${fmt(r.v)}</td><td>${(r.v/sum*100).toFixed(0)}%</td></tr>`).join("") +
+      '</table></div><small style="display:block;margin-top:8px;color:#B7BEC9">Valores dos itens antes de cupons e taxa de entrega. Promoções do mesmo lanche somam juntas; combos aparecem como combo.</small>';
+  }
+  const MESES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  async function loadMonthly(){
+    const box = document.getElementById("monthlyBox");
+    box.innerHTML = '<div class="empty-msg">⏳ Calculando…</div>';
+    const { data, error } = await fetchOrders(null, null, "created_at,total,delivery_type");
+    if(error){ box.innerHTML = '<div class="empty-msg">⚠️ Não foi possível carregar o histórico.</div>'; return; }
+    const m = {};
+    data.forEach(o => {
+      const d = new Date(new Date(o.created_at).getTime() - 3*3600*1000);
+      const k = d.getUTCFullYear() + "-" + String(d.getUTCMonth()+1).padStart(2,"0");
+      const r = m[k] || (m[k] = { v:0, n:0, e:0, r:0 });
+      r.v += Number(o.total||0); r.n++; if(o.delivery_type === "delivery") r.e++; else r.r++;
+    });
+    const keys = Object.keys(m).sort().reverse();
+    if(!keys.length){ box.innerHTML = '<div class="empty-msg">Ainda não há pedidos.</div>'; return; }
+    const T = { v:0, n:0, e:0, r:0 };
+    const line = (label, r, cls) => `<tr class="${cls||""}"><td>${label}</td><td>${fmt(r.v)}</td><td>${r.n}</td><td>${fmt(r.n ? r.v/r.n : 0)}</td><td>${r.e}</td><td>${r.r}</td></tr>`;
+    let html = '<div class="tbl-wrap"><table class="tbl"><tr><th>MÊS</th><th>FATURAMENTO</th><th>PEDIDOS</th><th>TICKET MÉDIO</th><th>ENTREGAS</th><th>RETIRADAS</th></tr>';
+    keys.forEach(k => { const r = m[k]; T.v += r.v; T.n += r.n; T.e += r.e; T.r += r.r; const [y,mo] = k.split("-"); html += line(MESES[Number(mo)-1] + "/" + y, r); });
+    html += line("TOTAL", T, "tot");
+    html += line("Out/2026 — resumo anterior*", { v:991, n:20, e:20, r:0 }, "muted");
+    box.innerHTML = html + '</table></div><small style="display:block;margin-top:8px;color:#B7BEC9">* Resumo antigo, de antes de os pedidos serem salvos no sistema. Não entra no total.</small>';
+  }
+  document.getElementById("foldMonthly").addEventListener("toggle", () => { if(document.getElementById("foldMonthly").open) loadMonthly(); });
+  function exportCsv(orders, range){
+    if(!orders.length){ alert("Não há pedidos carregados neste período. Escolha o período, clique em Atualizar e tente de novo."); return; }
+    const q = v => { let t = String(v == null ? "" : v).replace(/\r?\n/g, " "); if(/^[=@\t\r]|^[+\-](?![\d\s().\-]*$)/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
+    const num = v => Number(v||0).toFixed(2).replace(".", ",");
+    const head = ["Data","Hora","Cliente","Telefone","Tipo","Endereço","Itens","Pagamento","Total","Desconto","Cupom","Status","Observações","ID"];
+    const rows = orders.slice().sort((a,b) => new Date(a.created_at) - new Date(b.created_at)).map(o => {
+      const d = new Date(o.created_at);
+      return [d.toLocaleDateString("pt-BR",{timeZone:TZ}), d.toLocaleTimeString("pt-BR",{timeZone:TZ,hour:"2-digit",minute:"2-digit"}), o.customer_name, o.customer_phone, o.delivery_type === "delivery" ? "Delivery" : "Retirada", o.customer_address, (o.items||[]).map(i => i.qty + "x " + i.name).join(" | "), paymentOf(o), num(o.total), num(o.discount), o.coupon_code, o.status || o.order_status || o.state || "", o.notes, o.id];
+    });
+    const csv = "\uFEFF" + [head, ...rows].map(r => r.map(q).join(";")).join("\r\n");
+    const ymd = d => new Date(d.getTime() - 3*3600*1000).toISOString().slice(0,10);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type:"text/csv;charset=utf-8" }));
+    a.download = "pedidos_" + ymd(range[0]) + "_a_" + ymd(range[1] ? new Date(range[1].getTime() - 1) : new Date()) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  document.getElementById("exportCsv").onclick = () => exportCsv(lastOrders, lastRange);
+  // ======= CICLO ANUAL (zera sozinho a cada 1 ano; nenhum pedido é apagado) =======
+  let yearStartStr = null, yearOrders = [], yearRange = [null, null], yearAt = 0;
+  function cycleBounds(){
+    const base = yearStartStr || (new Date(Date.now() - 3*3600*1000).getUTCFullYear() + "-01-01");
+    let [y,m,d] = base.split("-").map(Number);
+    const at = yy => new Date(Date.UTC(yy, m-1, d) + 3*3600*1000), now = Date.now();
+    while(at(y+1).getTime() <= now) y++;
+    while(at(y).getTime() > now) y--;
+    return [at(y), at(y+1)];
+  }
+  async function loadYear(force){
+    if(!force && Date.now() - yearAt < 60000) return;
+    if(yearStartStr === null){
+      const { data } = await supabaseClient.from("settings").select("value").eq("key","year_cycle_start").maybeSingle();
+      yearStartStr = (data && /^\d{4}-\d{2}-\d{2}$/.test(String(data.value))) ? String(data.value) : "";
+      if(!yearStartStr) yearStartStr = new Date(Date.now() - 3*3600*1000).getUTCFullYear() + "-01-01";
+    }
+    const [st, en] = cycleBounds();
+    const { data, error } = await fetchOrders(st, en, "*");
+    const set = (id,v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+    if(error){ set("yearRev","erro"); return; }
+    yearOrders = data; yearRange = [st, en]; yearAt = Date.now();
+    const tot = data.reduce((x,o) => x + Number(o.total||0), 0), br = d => d.toLocaleDateString("pt-BR",{timeZone:TZ});
+    set("yearRev", fmt(tot)); set("yearOrd", String(data.length)); set("yearAvg", fmt(data.length ? tot/data.length : 0));
+    set("yearRange", "Ciclo de " + br(st) + " até " + br(new Date(en.getTime()-1)));
+    const inp = document.getElementById("yearStart"); if(inp) inp.value = new Date(st.getTime() - 3*3600*1000).toISOString().slice(0,10);
+  }
+  document.getElementById("yearExport").onclick = async () => { await loadYear(true); exportCsv(yearOrders, yearRange); };
+  document.getElementById("yearSave").onclick = async () => {
+    const v = document.getElementById("yearStart").value, msg = document.getElementById("yearMsg");
+    if(!v){ msg.textContent = "Escolha a data de início."; return; }
+    const { error } = await supabaseClient.from("settings").upsert({ key:"year_cycle_start", value:v, updated_at:new Date().toISOString() }, { onConflict:"key" });
+    msg.textContent = error ? "❌ Não salvou. Tente de novo." : "✅ Início do ciclo salvo.";
+    if(!error){ yearStartStr = v; loadYear(true); }
+  };
   document.getElementById("refreshOrders").onclick = loadOrders;
-  document.getElementById("orderPeriod").onchange = () => { document.getElementById("orderDate").style.display = document.getElementById("orderPeriod").value === "date" ? "block" : "none"; loadOrders(); };
+  document.getElementById("orderPeriod").onchange = () => {
+    const v = document.getElementById("orderPeriod").value;
+    document.getElementById("orderDate").style.display = v === "date" ? "block" : "none";
+    document.getElementById("rangeBox").style.display = v === "range" ? "block" : "none";
+    document.querySelectorAll("#periodSeg button").forEach(x => x.classList.toggle("on", x.dataset.p === v));
+    loadOrders();
+  };
+  document.getElementById("rangeFrom").onchange = loadOrders;
+  document.getElementById("rangeTo").onchange = loadOrders;
   document.getElementById("orderDate").onchange = loadOrders;
   document.getElementById("orderDate").style.display = "none";
 
@@ -1755,6 +1888,17 @@ on conflict (code) do nothing;
     let startDate, endDate = null;
     if(period === "week") { const day=shifted.getUTCDay(); startDate=new Date(Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth(),shifted.getUTCDate()-day)-OFFSET_H*3600*1000); }
     else if(period === "month") startDate=new Date(Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth(),1)-OFFSET_H*3600*1000);
+    else if(period === "7d" || period === "30d"){ const n = period === "7d" ? 6 : 29; startDate = new Date(Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth(),shifted.getUTCDate()-n)-OFFSET_H*3600*1000); }
+    else if(period === "lastmonth"){ startDate = new Date(Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth()-1,1)-OFFSET_H*3600*1000); endDate = new Date(Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth(),1)-OFFSET_H*3600*1000); }
+    else if(period === "year") startDate = new Date(Date.UTC(shifted.getUTCFullYear(),0,1)-OFFSET_H*3600*1000);
+    else if(period === "range"){
+      let f = document.getElementById("rangeFrom").value, t = document.getElementById("rangeTo").value;
+      if(!f || !t){ wrap.innerHTML = "Escolha a data inicial e a data final para consultar os pedidos."; return; }
+      if(t < f) [f,t] = [t,f];
+      const [y1,m1,d1] = f.split("-").map(Number), [y2,m2,d2] = t.split("-").map(Number);
+      startDate = new Date(Date.UTC(y1,m1-1,d1) - OFFSET_H*3600*1000);
+      endDate = new Date(Date.UTC(y2,m2-1,d2+1) - OFFSET_H*3600*1000);
+    }
     else if(period === "date") {
       const chosen = document.getElementById("orderDate").value;
       if(!chosen){ wrap.innerHTML = "Escolha uma data no calendário para consultar os pedidos."; return; }
@@ -1763,9 +1907,7 @@ on conflict (code) do nothing;
       endDate = new Date(startDate.getTime() + 24*3600*1000);
     } else startDate=new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()) - OFFSET_H * 3600 * 1000);
 
-    let query = supabaseClient.from("orders").select("*").gte("created_at", startDate.toISOString());
-    if(endDate) query = query.lt("created_at", endDate.toISOString());
-    const { data, error } = await query.order("created_at", { ascending: false });
+    const { data, error } = await fetchOrders(startDate, endDate, "*");
 
     if (error){ wrap.innerHTML = '<div class="empty-msg">⚠️ Não foi possível carregar os pedidos. Confira a conexão e as permissões do Supabase.</div>'; return; }
 
@@ -1775,7 +1917,7 @@ on conflict (code) do nothing;
     const discTotal = data.reduce((s, o) => s + Number(o.discount || 0), 0);
     if (discTotal > 0) document.getElementById("qtdPedidos").textContent += " • " + fmt(discTotal) + " em cupons";
     const moneyEl=document.getElementById("dashRevenuePeriod"); if(moneyEl) moneyEl.textContent=fmt(total);
-    const periodLabel=document.getElementById("dashPeriodLabel"); if(periodLabel) periodLabel.textContent=({day:"Hoje",date:"Data escolhida",week:"Esta semana",month:"Este mês"}[period]||"Período selecionado");
+    const periodLabel=document.getElementById("dashPeriodLabel"); if(periodLabel) periodLabel.textContent=({day:"Hoje",date:"Data escolhida",week:"Esta semana",month:"Este mês","7d":"Últimos 7 dias","30d":"Últimos 30 dias",lastmonth:"Mês passado",year:"Este ano",range:"Intervalo"}[period]||"Período selecionado");
     // Cartões de operação: status é lido dos pedidos existentes, sem alterar registros.
     const todayStart=new Date(Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth(),shifted.getUTCDate())-OFFSET_H*3600*1000);
     const todayEnd=new Date(todayStart.getTime()+24*3600*1000);
@@ -1789,6 +1931,7 @@ on conflict (code) do nothing;
     renderAnalytics(data);
     renderExtraStats(data, total);
     renderKpis(data, period);
+    lastOrders = data; lastRange = [startDate, endDate]; renderRanking(data); loadYear(period === "day" ? false : true);
 
 
     if (data.length === 0){
@@ -1889,7 +2032,7 @@ on conflict (code) do nothing;
   // Campanhas independentes: guardadas na mesma tabela settings, chave promo_campaigns.
   let promoCampaigns = [];
   let editingCampaignId = null;
-  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",supernova:"Supernova",parallax:"Parallax",sputnik:"Sputnik"};
+  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",supernova:"Supernova",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership"};
   const campaignComboNames = {individual:"Combo Solo",casal:"Dupla Cósmica",tripulacao:"Tripulação",familia:"Família Galáctica"};
   const campaignMoney = n => Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
   function campaignIsLive(c, now=new Date()){

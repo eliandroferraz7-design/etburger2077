@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bangers&family=Oswald:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap">
 <meta name="description" content="ET BURGER 2077 — Hambúrgueres artesanais. Peça pelo WhatsApp e confira nosso cardápio.">
-<link rel="icon" type="image/png" href="./favicon-32.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="./logo.png">
+<link rel="apple-touch-icon" href="./logo.png">
 <style>
 
   :root{
@@ -1315,7 +1315,10 @@
     } catch(e){ console.error("Erro ao carregar estoque:", e); }
   }
 
-  function isSoldOut(itemId){ return stockStatus[itemId] === false; }
+  function isSoldOut(itemId){
+    if (stockStatus[itemId] === false) return true;
+    try { const it = ALL_ITEMS.find(i => i.id === itemId); return !!(it && !(it.price > 0)); } catch(e){ return false; }
+  }
 
   async function logOrderToSupabase(order, legacyOrder){
     if (!supabaseClient) return;
@@ -1338,7 +1341,8 @@
       { id: "voyager", name: "VOYAGER", price: 26.00, desc: "Pão de hambúrguer, blend 120g, mussarela, ovo, bacon crocante, presunto, alface, tomate, maionese e cebola caramelizada" },
       { id: "supernova", name: "SUPERNOVA", price: 30.00, desc: "Pão de hambúrguer, blend 120g, mussarela, ovo, presunto, bacon, calabresa, alface, tomate, maionese e cebola caramelizada" },
       { id: "parallax", name: "PARALLAX", price: 36.00, desc: "Pão de hambúrguer, 2x blend 120g, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
-      { id: "sputnik", name: "SPUTNIK", price: 42.00, desc: "Pão de hambúrguer, 3x blend 120g, mussarela em triplo, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND", premium: true, tag: "O Premium da Casa" }
+      { id: "sputnik", name: "SPUTNIK", price: 42.00, desc: "Pão de hambúrguer, 3x blend 120g, mussarela em triplo, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND", premium: true, tag: "O Premium da Casa" },
+      { id: "mothership", name: "MOTHERSHIP", price: 0, desc: "Pão de hambúrguer, 2x blend 180g, calabresa fatiada, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND 180G" }
     ],
     fritas: [
       { id: "fritas_p", name: "BATATA FRITA PEQUENA", price: 10.00, desc: "Porção individual, crocante" },
@@ -1411,7 +1415,7 @@
       if (v && v.manual){
         const mc = v.manual.combo, mb = v.manual.burger;
         if (mc) { const list = (Array.isArray(mc.combos) ? mc.combos : (mc.combo && mc.combo !== "none" ? [mc.combo] : [])).filter(k=>COMBOS[k]); out.manual.combo = { combo: list[0] || "none", combos:list, discount: list.length ? clampPct(mc.discount) : 0, discounts: comboDiscountsOf(mc, list) }; }
-        if (mb) { const targets = (Array.isArray(mb.targets) ? mb.targets.map(String) : (mb.target && mb.target !== "none" ? [String(mb.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","parallax","sputnik"].includes(x)); out.manual.burger = { target: targets[0] || "none", targets, discount: clampPct(mb.discount), discounts: mb.discounts||{}, prices: pricesOf(mb) }; }
+        if (mb) { const targets = (Array.isArray(mb.targets) ? mb.targets.map(String) : (mb.target && mb.target !== "none" ? [String(mb.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","parallax","sputnik","mothership"].includes(x)); out.manual.burger = { target: targets[0] || "none", targets, discount: clampPct(mb.discount), discounts: mb.discounts||{}, prices: pricesOf(mb) }; }
       }
     } catch(e){}
     try{
@@ -1419,7 +1423,7 @@
         const c = v && v.combos && v.combos[d];
         if (c) { const list = (Array.isArray(c.combos) ? c.combos : (c.combo && c.combo !== "none" ? [c.combo] : [])).filter(k=>COMBOS[k]); out.combos[d] = { combo:list[0] || "none", combos:list, discount:list.length ? clampPct(c.discount) : 0, discounts: comboDiscountsOf(c, list) }; }
         const b = v && v.burgers && v.burgers[d];
-        if (b) { const targets = (Array.isArray(b.targets) ? b.targets.map(String) : (b.target && b.target !== "none" ? [String(b.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","parallax","sputnik"].includes(x)); out.burgers[d] = { target: targets[0] || "none", targets, discount: clampPct(b.discount), discounts: b.discounts || {}, prices: pricesOf(b) }; }
+        if (b) { const targets = (Array.isArray(b.targets) ? b.targets.map(String) : (b.target && b.target !== "none" ? [String(b.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","parallax","sputnik","mothership"].includes(x)); out.burgers[d] = { target: targets[0] || "none", targets, discount: clampPct(b.discount), discounts: b.discounts || {}, prices: pricesOf(b) }; }
       }
     } catch(e){}
     return out;
@@ -2329,11 +2333,12 @@
       voyager: "XBA",      // X-Bacon
       supernova: "XCB",    // X-Calabacon
       parallax: "XSD",     // X-Salada Duplo
-      sputnik: "XBT"       // X-Burger Triplo
+      sputnik: "XBT",      // X-Burger Triplo
+      mothership: "XCD"    // X-Calabresa Duplo
     };
     const burgerNames = {
       roswell: "Roswell", area51: "Área 51", hangar18: "Hangar 18",
-      voyager: "Voyager", supernova: "Supernova", parallax: "Parallax", sputnik: "Sputnik"
+      voyager: "Voyager", supernova: "Supernova", parallax: "Parallax", sputnik: "Sputnik", mothership: "Mothership"
     };
     function orderItemLabel(item){
       const itemId = item.id || (Array.isArray(item.parts) && item.parts.length === 1 ? item.parts[0] : "");
