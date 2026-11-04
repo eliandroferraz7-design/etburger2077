@@ -1340,6 +1340,7 @@
       { id: "hangar18", name: "HANGAR 18", price: 24.00, desc: "Pão de brioche, blend 120g, calabresa fatiada, mussarela, ovo, presunto, alface, tomate, maionese e cebola caramelizada" },
       { id: "voyager", name: "VOYAGER", price: 26.00, desc: "Pão de brioche, blend 120g, mussarela, ovo, bacon crocante, presunto, alface, tomate, maionese e cebola caramelizada" },
       { id: "supernova", name: "SUPERNOVA", price: 30.00, desc: "Pão de brioche, blend 120g, mussarela, ovo, presunto, bacon, calabresa, alface, tomate, maionese e cebola caramelizada" },
+      { id: "darkside", name: "DARKSIDE", price: 30.00, desc: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
       { id: "parallax", name: "PARALLAX", price: 36.00, desc: "Pão de brioche, 2x blend 120g, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
       { id: "mothership", name: "MOTHERSHIP", price: 38.00, desc: "Pão de brioche, 2x blend 120g, calabresa fatiada, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
       { id: "sputnik", name: "SPUTNIK", price: 42.00, desc: "Pão de brioche, 3x blend 120g, mussarela em triplo, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND", premium: true, tag: "O Premium da Casa" }
@@ -1415,7 +1416,7 @@
       if (v && v.manual){
         const mc = v.manual.combo, mb = v.manual.burger;
         if (mc) { const list = (Array.isArray(mc.combos) ? mc.combos : (mc.combo && mc.combo !== "none" ? [mc.combo] : [])).filter(k=>COMBOS[k]); out.manual.combo = { combo: list[0] || "none", combos:list, discount: list.length ? clampPct(mc.discount) : 0, discounts: comboDiscountsOf(mc, list) }; }
-        if (mb) { const targets = (Array.isArray(mb.targets) ? mb.targets.map(String) : (mb.target && mb.target !== "none" ? [String(mb.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","parallax","sputnik","mothership"].includes(x)); out.manual.burger = { target: targets[0] || "none", targets, discount: clampPct(mb.discount), discounts: mb.discounts||{}, prices: pricesOf(mb) }; }
+        if (mb) { const targets = (Array.isArray(mb.targets) ? mb.targets.map(String) : (mb.target && mb.target !== "none" ? [String(mb.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","darkside","parallax","sputnik","mothership"].includes(x)); out.manual.burger = { target: targets[0] || "none", targets, discount: clampPct(mb.discount), discounts: mb.discounts||{}, prices: pricesOf(mb) }; }
       }
     } catch(e){}
     try{
@@ -1423,7 +1424,7 @@
         const c = v && v.combos && v.combos[d];
         if (c) { const list = (Array.isArray(c.combos) ? c.combos : (c.combo && c.combo !== "none" ? [c.combo] : [])).filter(k=>COMBOS[k]); out.combos[d] = { combo:list[0] || "none", combos:list, discount:list.length ? clampPct(c.discount) : 0, discounts: comboDiscountsOf(c, list) }; }
         const b = v && v.burgers && v.burgers[d];
-        if (b) { const targets = (Array.isArray(b.targets) ? b.targets.map(String) : (b.target && b.target !== "none" ? [String(b.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","parallax","sputnik","mothership"].includes(x)); out.burgers[d] = { target: targets[0] || "none", targets, discount: clampPct(b.discount), discounts: b.discounts || {}, prices: pricesOf(b) }; }
+        if (b) { const targets = (Array.isArray(b.targets) ? b.targets.map(String) : (b.target && b.target !== "none" ? [String(b.target)] : [])).filter(x => ["line:classica","roswell","area51","hangar18","voyager","supernova","darkside","parallax","sputnik","mothership"].includes(x)); out.burgers[d] = { target: targets[0] || "none", targets, discount: clampPct(b.discount), discounts: b.discounts || {}, prices: pricesOf(b) }; }
       }
     } catch(e){}
     return out;
@@ -2332,13 +2333,14 @@
       hangar18: "XC",      // X-Calabresa
       voyager: "XBA",      // X-Bacon
       supernova: "XCB",    // X-Calabacon
+      darkside: "XBD",     // X-Burger Duplo
       parallax: "XSD",     // X-Salada Duplo
       sputnik: "XBT",      // X-Burger Triplo
       mothership: "XCD"    // X-Calabresa Duplo
     };
     const burgerNames = {
       roswell: "Roswell", area51: "Área 51", hangar18: "Hangar 18",
-      voyager: "Voyager", supernova: "Supernova", parallax: "Parallax", sputnik: "Sputnik", mothership: "Mothership"
+      voyager: "Voyager", supernova: "Supernova", darkside: "Darkside", parallax: "Parallax", sputnik: "Sputnik", mothership: "Mothership"
     };
     function orderItemLabel(item){
       const itemId = item.id || (Array.isArray(item.parts) && item.parts.length === 1 ? item.parts[0] : "");
