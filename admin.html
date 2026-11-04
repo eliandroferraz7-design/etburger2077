@@ -509,6 +509,22 @@ details.fold[open]>summary::after{content:"−"}
   </div>
 
   <div class="panel" id="panel-estoque">
+    <section class="promo-box" id="newBurgerBox">
+      <h3 id="nbTitle">➕ Novo burger</h3>
+      <div class="hint">Burgers criados aqui entram no site sozinhos (em até ~15 segundos), sem mexer no código. Eles aparecem em “Burgers clássicos” na lista abaixo, onde você pode esgotar ou mudar o preço, e já podem entrar em promoções.</div>
+      <div class="cost-form">
+        <div><label for="nbName">Nome</label><input id="nbName" maxlength="30" autocomplete="off" placeholder="Ex.: DARKSIDE"></div>
+        <div><label for="nbPrice">Preço (R$)</label><input id="nbPrice" type="number" min="0.01" step="0.01" placeholder="30,00"></div>
+        <div class="wide"><label for="nbDesc">Descrição (ingredientes)</label><input id="nbDesc" maxlength="220" placeholder="Pão de brioche, 2x blend 120g, mussarela em dobro..."></div>
+        <div><label for="nbBadge">Selo (opcional)</label><input id="nbBadge" maxlength="14" placeholder="Ex.: 2X BLEND, NOVO"></div>
+      </div>
+      <div class="btn-row" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" class="save-btn" id="nbSave">💾 Salvar burger</button>
+        <button type="button" class="refresh-btn" id="nbCancel" style="display:none">Cancelar edição</button>
+      </div>
+      <div id="nbMsg" class="save-msg" aria-live="polite"></div>
+      <div id="nbList"></div>
+    </section>
     <div id="stockList"></div>
   </div>
 
@@ -552,7 +568,7 @@ details.fold[open]>summary::after{content:"−"}
         <option value="roswell">Roswell (XB) — X-Burger</option>
         <option value="area51">Área 51 (XS) — X-Salada</option>
         <option value="hangar18">Hangar 18 (XC) — X-Calabresa</option>
-        <option value="voyager">Voyager (XBA) — X-Bacon</option>
+        <option value="voyager">Cosmos (XBA) — X-Bacon</option>
         <option value="supernova">Supernova (XCB) — X-Calabacon</option>
         <option value="darkside">Darkside (XBD) — X-Burger Duplo</option>
         <option value="parallax">Parallax (XSD) — X-Salada Duplo</option>
@@ -567,7 +583,7 @@ details.fold[open]>summary::after{content:"−"}
       <div class="cost-form">
         <div><label for="campaignName">Nome da campanha</label><input id="campaignName" maxlength="80" placeholder="Ex.: Sextou ET"></div>
         <div><label for="campaignType">Tipo</label><select id="campaignType"><option value="burger">Hambúrguer avulso</option><option value="combo">Combo</option></select></div>
-        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="supernova">Supernova</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option></select></div>
+        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Cosmos</option><option value="supernova">Supernova</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option></select></div>
         <div><label for="campaignDiscountType">Desconto</label><select id="campaignDiscountType"><option value="percentual">Percentual (%)</option><option value="preco">Preço promocional (R$)</option></select></div>
         <div><label for="campaignValue">Valor</label><input id="campaignValue" type="number" min="0.01" step="0.01" value="10"></div>
         <div><label for="campaignBasePrice">Preço normal (R$)</label><input id="campaignBasePrice" type="number" min="0.01" step="0.01" placeholder="Ex.: 20,00"></div>
@@ -746,7 +762,7 @@ details.fold[open]>summary::after{content:"−"}
     document.getElementById("app").style.display = "block";
     loadStoreToggle();
     loadDeliveryFeeSetting();
-    loadStock().catch(() => {}).then(loadPromos);
+    loadCustomMenu().catch(() => {}).then(() => loadStock()).catch(() => {}).then(loadPromos);
     loadFeaturedBurgerChoice();
     loadSpotlightVisibility();
     loadOrders();
@@ -788,6 +804,118 @@ details.fold[open]>summary::after{content:"−"}
     };
   });
 
+  // ======= BURGERS CADASTRADOS PELO PAINEL (settings.custom_menu) =======
+  const customBurgerIds = new Set();
+  let customBurgers = [];
+  let editingBurgerId = null;
+  const nbEl = id => document.getElementById(id);
+  function nbMsg(t, bad){ const m = nbEl("nbMsg"); m.textContent = t; m.style.color = bad ? "#F28B82" : ""; }
+  const slugify = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+  // registra os burgers extras em todas as listas do painel (estoque, promoções, campanhas, destaque)
+  function syncCustomRegistry(){
+    [...customBurgerIds].forEach(id => {
+      delete COMBO_NAMES[id]; delete BURGER_LABEL[id]; delete BURGER_DEFAULT_PRICE[id]; delete campaignBurgerNames[id];
+      [COMBO_ROWS, CLASSIC_BURGERS].forEach(arr => { const i = arr.findIndex(x => (Array.isArray(x) ? x[0] : x.item_id) === id); if (i >= 0) arr.splice(i, 1); });
+      document.querySelectorAll('#featuredBurgerSelect option[value="' + id + '"]').forEach(o => o.remove());
+    });
+    customBurgerIds.clear();
+    const sel = nbEl("featuredBurgerSelect");
+    customBurgers.forEach(b => {
+      customBurgerIds.add(b.id);
+      const up = b.name.toUpperCase();
+      COMBO_ROWS.push({ item_id: b.id, name: up }); COMBO_NAMES[b.id] = up;
+      CLASSIC_BURGERS.push([b.id, b.name]); BURGER_LABEL[b.id] = b.name; BURGER_DEFAULT_PRICE[b.id] = b.price; campaignBurgerNames[b.id] = b.name;
+      if (sel) sel.insertAdjacentHTML("beforeend", '<option value="' + esc(b.id) + '">' + esc(b.name) + '</option>');
+    });
+  }
+
+  async function loadCustomMenu(){
+    const { data, error } = await supabaseClient.from("settings").select("value").eq("key", "custom_menu").maybeSingle();
+    if (!error && data && data.value && Array.isArray(data.value.burgers)){
+      customBurgers = data.value.burgers.filter(b => b && b.id && b.name && Number(b.price) > 0)
+        .map(b => ({ id: String(b.id), name: String(b.name), price: Number(b.price), desc: String(b.desc || ""), badge: String(b.badge || "") }));
+    }
+    syncCustomRegistry();
+    renderCustomList();
+    if (customBurgers.length) loadFeaturedBurgerChoice();
+  }
+
+  function renderCustomList(){
+    const el = nbEl("nbList");
+    if (!customBurgers.length){ el.innerHTML = '<div class="hint" style="margin-top:12px">Nenhum burger cadastrado por aqui ainda.</div>'; return; }
+    el.innerHTML = customBurgers.map(b => `
+      <div class="order-card" data-nb="${esc(b.id)}" style="margin-top:10px">
+        <div class="row1"><span>${esc(b.name.toUpperCase())}${b.badge ? " • " + esc(b.badge) : ""}</span><span>${fmt(b.price)}</span></div>
+        <div class="items">${esc(b.desc)}</div>
+        <div class="btn-row"><button type="button" class="price-save nb-edit">✏️ Editar</button><button type="button" class="price-save nb-del">🗑️ Remover</button></div>
+      </div>`).join("");
+  }
+
+  async function persistCustomMenu(list){
+    const { error } = await supabaseClient.from("settings").upsert({ key: "custom_menu", value: { burgers: list }, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    return !error;
+  }
+  function nbReset(){
+    editingBurgerId = null;
+    ["nbName", "nbPrice", "nbDesc", "nbBadge"].forEach(i => nbEl(i).value = "");
+    nbEl("nbTitle").textContent = "➕ Novo burger"; nbEl("nbSave").textContent = "💾 Salvar burger"; nbEl("nbCancel").style.display = "none";
+  }
+  async function afterBurgerChange(){
+    syncCustomRegistry(); renderCustomList();
+    await loadStock().catch(() => {});
+    loadPromos();
+    if (customBurgers.length) loadFeaturedBurgerChoice();
+  }
+
+  nbEl("nbSave").addEventListener("click", async () => {
+    const name = nbEl("nbName").value.trim().replace(/\s+/g, " ");
+    const price = Number(nbEl("nbPrice").value);
+    const desc = nbEl("nbDesc").value.trim();
+    const badge = nbEl("nbBadge").value.trim().toUpperCase();
+    if (name.length < 2) return nbMsg("Informe o nome do burger.", true);
+    if (!(price > 0) || price > 999) return nbMsg("Informe um preço válido (maior que zero).", true);
+    if (desc.length < 5) return nbMsg("Descreva os ingredientes para o cliente saber o que vem no burger.", true);
+    let id = editingBurgerId;
+    if (!id){
+      id = slugify(name);
+      if (!id) return nbMsg("Use letras ou números no nome.", true);
+      if (/^(fritas|refri|combo)/.test(id)) id = "burger" + id;
+      if (CLASSIC_BURGERS.some(([x]) => x === id) || customBurgerIds.has(id)) return nbMsg("Já existe um burger com esse nome no cardápio.", true);
+    }
+    const b = { id, name, price: Math.round(price * 100) / 100, desc, badge };
+    const next = editingBurgerId ? customBurgers.map(x => x.id === id ? b : x) : [...customBurgers, b];
+    const btn = nbEl("nbSave"); btn.disabled = true; nbMsg("Salvando...");
+    const ok = await persistCustomMenu(next);
+    btn.disabled = false;
+    if (!ok) return nbMsg("Não foi possível salvar. Confira as permissões da tabela settings.", true);
+    customBurgers = next;
+    const wasEditing = !!editingBurgerId;
+    nbReset();
+    nbMsg(wasEditing ? "Burger atualizado! O site muda em instantes." : "Burger criado! Ele já aparece no site em instantes.");
+    await afterBurgerChange();
+  });
+  nbEl("nbCancel").addEventListener("click", () => { nbReset(); nbMsg(""); });
+  nbEl("nbList").addEventListener("click", async e => {
+    const card = e.target.closest("[data-nb]"); if (!card) return;
+    const b = customBurgers.find(x => x.id === card.dataset.nb); if (!b) return;
+    if (e.target.closest(".nb-edit")){
+      editingBurgerId = b.id;
+      nbEl("nbName").value = b.name; nbEl("nbPrice").value = b.price; nbEl("nbDesc").value = b.desc; nbEl("nbBadge").value = b.badge;
+      nbEl("nbTitle").textContent = "✏️ Editando: " + b.name; nbEl("nbSave").textContent = "💾 Salvar alterações"; nbEl("nbCancel").style.display = "";
+      nbEl("newBurgerBox").scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (e.target.closest(".nb-del")){
+      if (!confirm("Remover o burger " + b.name.toUpperCase() + " do cardápio? Os pedidos antigos continuam no histórico.")) return;
+      const next = customBurgers.filter(x => x.id !== b.id);
+      if (!(await persistCustomMenu(next))) return nbMsg("Não foi possível remover. Confira as permissões da tabela settings.", true);
+      try { await supabaseClient.from("stock").delete().eq("item_id", b.id); } catch(err){}
+      customBurgers = next;
+      if (editingBurgerId === b.id) nbReset();
+      nbMsg("Burger removido.");
+      await afterBurgerChange();
+    }
+  });
+
   // ======= ESTOQUE (agrupado) =======
   // Ordem dos cards no painel. "match" decide em qual grupo cada item_id entra.
   const GROUPS = [
@@ -795,7 +923,7 @@ details.fold[open]>summary::after{content:"−"}
       note:"Combo desligado some do site." },
     { key:"fritas",  title:"🍟 Fritas",                    match: id => id.startsWith("fritas_"),
       note:"Fritas desligadas também saem dos combos (o preço do combo é recalculado)." },
-    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["roswell","area51","hangar18","voyager","supernova","darkside","parallax","sputnik","mothership"].includes(id) },
+    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["roswell","area51","hangar18","voyager","supernova","darkside","parallax","sputnik","mothership"].includes(id) || customBurgerIds.has(id) },
     { key:"bebidas", title:"🥤 Bebidas",                   match: id => id.startsWith("refri") },
     { key:"outros",  title:"📦 Outros",                    match: () => true }
   ];
@@ -820,6 +948,7 @@ details.fold[open]>summary::after{content:"−"}
     if (error){ wrap.innerHTML = "Erro ao carregar estoque. Confira a chave do Supabase."; return; }
     // Itens Smash antigos ficam preservados no Supabase, mas não aparecem mais no painel.
     stockRows = (data || []).filter(r => !String(r.item_id || "").endsWith("_s"));
+    stockRows.forEach(r => { if (r.item_id === "voyager") r.name = "COSMOS"; });   // mesmo item, novo nome
     COMBO_ROWS.forEach(c => {
       if (!stockRows.some(r => r.item_id === c.item_id)) stockRows.push({ item_id:c.item_id, name:c.name, available:true, _virtual:true });
     });
@@ -1221,8 +1350,8 @@ on conflict (code) do nothing;
   //   manual       = { combo:{...}, burger:{...} }
   const DAYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const COMBO_LIST = [["individual","Combo Solo"],["casal","Dupla Cósmica"],["tripulacao","Tripulação"],["familia","Família Galáctica"]];
-  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["supernova","Supernova"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"]];
-  const BURGER_DEFAULT_PRICE = { roswell:20, area51:22, hangar18:24, voyager:26, supernova:30, darkside:30, parallax:36, sputnik:42, mothership:38 };
+  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Cosmos"],["supernova","Supernova"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"]];
+  const BURGER_DEFAULT_PRICE = { roswell:20, area51:22, hangar18:24, voyager:30, supernova:30, darkside:30, parallax:36, sputnik:42, mothership:38 };
   const LINE_KEY = "line:classica";
   const COMBO_LABEL = Object.fromEntries(COMBO_LIST);
   const BURGER_LABEL = Object.fromEntries(CLASSIC_BURGERS);
@@ -1719,12 +1848,14 @@ on conflict (code) do nothing;
       if(n.includes("roswell")) return "roswell";
       if(n.includes("area 51") || n.includes("area51")) return "area51";
       if(n.includes("hangar 18") || n.includes("hangar18")) return "hangar18";
-      if(n.includes("voyager")) return "voyager";
+      if(n.includes("cosmos") || n.includes("voyager")) return "voyager";
       if(n.includes("supernova")) return "supernova";
       if(n.includes("darkside")) return "darkside";
       if(n.includes("parallax")) return "parallax";
       if(n.includes("sputnik")) return "sputnik";
       if(n.includes("mothership")) return "mothership";
+      const cb = customBurgers.find(b => n.includes(norm(b.name)));
+      if(cb) return cb.id;
       if(n.includes("fritas") || n.includes("batata")) return "fritas";
       return null;
     };
@@ -2035,7 +2166,7 @@ on conflict (code) do nothing;
   // Campanhas independentes: guardadas na mesma tabela settings, chave promo_campaigns.
   let promoCampaigns = [];
   let editingCampaignId = null;
-  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",supernova:"Supernova",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership"};
+  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Cosmos",supernova:"Supernova",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership"};
   const campaignComboNames = {individual:"Combo Solo",casal:"Dupla Cósmica",tripulacao:"Tripulação",familia:"Família Galáctica"};
   const campaignMoney = n => Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
   function campaignIsLive(c, now=new Date()){
