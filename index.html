@@ -1048,11 +1048,23 @@
   }
   @media (prefers-reduced-motion: reduce){ .coupon-star{ display:none; } }
 
-  /* portal aberto: faixa compacta, sem contador zerado */
+  /* ===== visual temático v2 ===== */
+  body{background-image:radial-gradient(rgba(26,20,16,.05) 1px,transparent 1.2px);background-size:5px 5px}
+  .menu-sec{margin:18px 0 -2px;text-align:center}
+  .menu-sec:first-child{margin-top:0}
+  .menu-sec-k{display:block;font:700 11px 'Oswald',sans-serif;letter-spacing:4px;color:var(--rust)}
+  .menu-sec-t{display:block;font:30px 'Alfa Slab One',cursive;color:var(--ink);line-height:1.1}
+  .menu-sec-s{display:block;font:500 12.5px 'Oswald',sans-serif;letter-spacing:.8px;color:var(--teal);margin-top:2px;padding-bottom:8px;border-bottom:2px dashed rgba(26,20,16,.35)}
+  .dossie{font:600 10.5px 'Oswald',sans-serif;letter-spacing:2px;color:#8a7d6a;margin-bottom:6px}
+  .dossie b{color:var(--rust)}
+  .item-card.duplo{border-left:8px solid var(--mustard-2)}
+  .item-badge{background:var(--mustard)!important;color:var(--ink)!important;border:2px solid var(--ink)!important;transform:rotate(-4deg);box-shadow:2px 2px 0 var(--rust);padding:1px 8px!important}
+  .carimbo{position:absolute;left:18px;bottom:16px;font:15px 'Bangers',cursive;letter-spacing:2px;color:rgba(193,68,14,.6);border:2px solid rgba(193,68,14,.6);padding:1px 8px;transform:rotate(-6deg);pointer-events:none}
+  .dossie{color:#6f6250!important}
+  .tab .tab-sub{font-size:11px!important}
   .launch-panel.opened{padding:10px 16px}
   .launch-panel.opened .launch-title,.launch-panel.opened .launch-count{display:none}
-  .launch-panel.opened .launch-kicker{font-size:13px;letter-spacing:3px;color:#8de8a1}
-  .launch-panel.opened .launch-message{margin-top:3px;font-size:13px}
+  .launch-panel.opened .launch-kicker{font-size:12px;letter-spacing:2px}
 </style>
 <script src="https://unpkg.com/@supabase/supabase-js@2.45.0"></script>
 </head>
@@ -1122,7 +1134,7 @@
   <div class="tabs">
     <button class="tab active" data-line="classica">
       Burgers
-      <span class="tab-sub">Blend 120g</span>
+      <span class="tab-sub">Clássicos e duplos</span>
     </button>
     <button class="tab" data-line="combos">
       Combos
@@ -1761,16 +1773,23 @@
     } else {
       comboBanner.style.display = "none";
     }
-    visibleItems(menuData[line]).forEach(item => {
+    const GRP = i => /^3X/i.test(i.badge||"") ? 2 : /^2X/i.test(i.badge||"") ? 1 : 0;
+    const GRP_INFO = [["MISSÃO 01","CLÁSSICOS","blend 120g · brioche, alface, tomate e maionese"],["MISSÃO 02","DUPLOS","2x blend 120g · mussarela em dobro"],["PROTOCOLO SPUTNIK","TRIPLO","3x blend 120g · o premium da casa"]];
+    let lastGrp = -1, nth = 0;
+    [...visibleItems(menuData[line])].sort((a,b)=>GRP(a)-GRP(b)).forEach(item => {
+      const g = GRP(item); nth++;
+      if (g !== lastGrp){ lastGrp = g; const h = document.createElement("div"); h.className = "menu-sec"; h.innerHTML = `<span class="menu-sec-k">${GRP_INFO[g][0]}</span><span class="menu-sec-t">${GRP_INFO[g][1]}</span><span class="menu-sec-s">${GRP_INFO[g][2]}</span>`; grid.appendChild(h); }
       const out = isSoldOut(item.id);
       const card = document.createElement("div");
-      card.className = "item-card visible" + (item.premium ? " premium" : "") + (out ? " sold-out" : "");
+      card.className = "item-card visible" + (item.premium ? " premium" : "") + (g === 1 ? " duplo" : "") + (out ? " sold-out" : "");
       const ep = effectivePrice(item);
       const priceHtml = ep.pct
         ? `<div class="price-box"><span class="combo-price-old">${fmt(ep.old)}</span><span class="item-price">${fmt(ep.price)}</span></div>`
         : `<div class="item-price">${fmt(item.price)}</div>`;
       card.innerHTML = `
         ${item.premium ? `<div class="premium-tag">★ PREMIUM</div>` : ""}
+        <div class="dossie">ARQUIVO #${String(nth).padStart(2,"0")} · BLEND ${"●".repeat(g+1)}${["roswell","area51"].includes(item.id) ? ` · <b>⭐ MAIS PEDIDO</b>` : ""}</div>
+        ${item.premium ? `<div class="carimbo">CONFIDENCIAL</div>` : ""}
         <div class="item-top">
           <div class="item-name">${item.name}${item.badge ? `<span class="item-badge">${item.badge}</span>` : ""}${out ? `<span class="sold-out-tag">ESGOTADO</span>` : ""}</div>
           ${priceHtml}
