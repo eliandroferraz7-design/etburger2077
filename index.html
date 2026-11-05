@@ -1047,6 +1047,12 @@
     100%{ opacity:0; transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(200deg); }
   }
   @media (prefers-reduced-motion: reduce){ .coupon-star{ display:none; } }
+
+  /* portal aberto: faixa compacta, sem contador zerado */
+  .launch-panel.opened{padding:10px 16px}
+  .launch-panel.opened .launch-title,.launch-panel.opened .launch-count{display:none}
+  .launch-panel.opened .launch-kicker{font-size:13px;letter-spacing:3px;color:#8de8a1}
+  .launch-panel.opened .launch-message{margin-top:3px;font-size:13px}
 </style>
 <script src="https://unpkg.com/@supabase/supabase-js@2.45.0"></script>
 </head>
@@ -2552,7 +2558,7 @@
       kicker.textContent="🟢 PORTAL ABERTO";
       title.textContent="PEDIDOS LIBERADOS!";
       count.textContent="00:00:00";
-      msg.textContent="🛸 Decolagem concluída. Escolha seu lanche e envie sua missão pelo WhatsApp!";
+      msg.textContent="Pedidos liberados até 00h. Escolha seu lanche abaixo 🛸";
       if(lastStoreOpenState === false){ panel.classList.add("just-opened"); }
       return;
     }
