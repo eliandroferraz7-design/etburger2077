@@ -977,6 +977,21 @@
     .neon-fx, .neon-dot{ display:none !important; }
   }
 
+  /* ============ SUGESTÃO NA HORA DE FINALIZAR (batata / refri) ============ */
+  .upsell{ margin:14px 0 6px; padding:12px; border:2px dashed var(--teal); border-radius:14px; background:rgba(27,77,77,.07); animation: gift-pop .45s cubic-bezier(.2,1.4,.4,1) both; }
+  .upsell-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-family:'Oswald',sans-serif; font-weight:700; font-size:14px; letter-spacing:.5px; color:var(--teal); }
+  .upsell-close{ border:0; background:none; font-size:20px; line-height:1; color:#7a6f61; cursor:pointer; padding:0 4px; }
+  .upsell-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid rgba(26,20,16,.14); }
+  .upsell-head + .upsell-row{ border-top:0; }
+  .upsell-ic{ font-size:26px; line-height:1; }
+  .upsell-info{ flex:1; min-width:0; font-family:'Oswald',sans-serif; }
+  .upsell-name{ font-weight:700; font-size:14px; color:var(--ink); }
+  .upsell-why{ font-size:12px; color:#6b6155; }
+  .upsell-price{ font-family:'Oswald',sans-serif; font-weight:700; font-size:14px; color:var(--rust); white-space:nowrap; }
+  .upsell-add{ border:2px solid var(--ink); background:var(--mustard); color:var(--ink); border-radius:10px; padding:7px 12px; font:700 13px 'Oswald',sans-serif; cursor:pointer; box-shadow:2px 2px 0 var(--ink); white-space:nowrap; }
+  .upsell-add:active{ transform:translate(1px,1px); box-shadow:1px 1px 0 var(--ink); }
+  @media (prefers-reduced-motion: reduce){ .upsell{ animation:none; } }
+
   /* ============ LEVE E GANHE (brindes criados no painel) ============ */
   .gift-banner{ display:flex; flex-wrap:wrap; gap:8px; }
   .gift-pill{
@@ -2427,7 +2442,8 @@
         </div>`).join("");
     }
 
-    if (entries.length) body.insertAdjacentHTML("beforeend", giftDrawerHtml());
+    if (!entries.length) upsellDismissed = false;
+    if (entries.length) body.insertAdjacentHTML("beforeend", giftDrawerHtml() + upsellHtml());
 
     const t = orderTotals();
     const delPaid = t.del - t.deliveryDiscount;
@@ -2438,6 +2454,9 @@
   }
 
   document.getElementById("drawerBody").addEventListener("click", (e) => {
+    const up = e.target.closest(".upsell-add");
+    if (up){ addSuggestion(up.dataset.id); return; }
+    if (e.target.closest(".upsell-close")){ upsellDismissed = true; updateDrawer(); return; }
     const q = e.target.closest(".qty-btn");
     if (q){
       const it = cart[q.dataset.id];
@@ -2970,6 +2989,62 @@
       if (s.qty > prev) setTimeout(() => showToast("🎁 Brinde liberado: " + s.qty + "× " + giftName(s.g)), 380);
       giftSeen[s.g.id] = s.qty;
     });
+  }
+
+  // ======= SUGESTÃO NA HORA DE FINALIZAR (batata / refri) =======
+  // Aparece no carrinho quando há hambúrguer no pedido. Só sugere o que está disponível no painel
+  // e que o cliente ainda não tem (nem dentro de um combo). O "×" dispensa até esvaziar o carrinho.
+  let upsellDismissed = false;
+  const UPSELL_WHY = {
+    fritas_p: "Crocante, pra acompanhar", fritas_m: "Porção pra dividir", fritas_g: "Pra galera toda",
+    refri: "Geladinho pra acompanhar", refri1l: "Bom pra dividir", refri2l: "Pra mesa toda", refri220: "Pequeno e baratinho"
+  };
+  function upsellPick(){
+    const burgerIds = new Set(allBurgers().map(b => b.id));
+    const friesIds = new Set(menuData.fritas.map(f => f.id));
+    const drinkIds = new Set(drinksData.map(d => d.id));
+    let burgers = 0, hasFries = false, hasDrink = false;
+    cartItems().forEach(i => (i.parts || []).forEach(id => {
+      if (burgerIds.has(id)) burgers += i.qty;
+      if (friesIds.has(id)) hasFries = true;
+      if (drinkIds.has(id)) hasDrink = true;
+    }));
+    if (!burgers) return [];
+    const firstOk = order => order.find(id => getItemById(id) && !isSoldOut(id));
+    const out = [];
+    if (!hasFries){
+      const id = firstOk(burgers >= 3 ? ["fritas_m","fritas_p","fritas_g"] : ["fritas_p","fritas_m","fritas_g"]);
+      if (id) out.push({ id, icon: "🍟" });
+    }
+    if (!hasDrink){
+      const order = burgers >= 3 ? ["refri2l","refri1l","refri","refri220"] : burgers === 2 ? ["refri1l","refri","refri2l","refri220"] : ["refri","refri1l","refri2l","refri220"];
+      const id = firstOk(order);
+      if (id) out.push({ id, icon: "🥤" });
+    }
+    return out;
+  }
+  function upsellHtml(){
+    if (upsellDismissed) return "";
+    const picks = upsellPick();
+    if (!picks.length) return "";
+    return `<div class="upsell"><div class="upsell-head"><span>🛸 Que tal levar também?</span><button type="button" class="upsell-close" aria-label="Dispensar sugestão">×</button></div>` +
+      picks.map(p => {
+        const it = getItemById(p.id);
+        return `<div class="upsell-row"><span class="upsell-ic">${p.icon}</span>
+          <div class="upsell-info"><div class="upsell-name">${giftEsc(it.name)}</div><div class="upsell-why">${giftEsc(UPSELL_WHY[p.id] || "")}</div></div>
+          <span class="upsell-price">${fmt(effectivePrice(it).price)}</span>
+          <button type="button" class="upsell-add" data-id="${p.id}">+ Adicionar</button></div>`;
+      }).join("") + `</div>`;
+  }
+  function addSuggestion(id){
+    const item = getItemById(id);
+    if (!item || isSoldOut(id)) return;
+    const ep = effectivePrice(item);
+    const key = ep.pct ? `${item.id}@${ep.price}` : item.id;
+    if (!cart[key]) cart[key] = { name: ep.pct ? `${item.name} (PROMO ${ep.pct}% OFF)` : item.name, price: ep.price, full: ep.old || item.price, qty: 0, parts: [item.id] };
+    cart[key].qty += 1;
+    updateCartUI();
+    showToast(item.name + " adicionado ao pedido 🛸");
   }
 
   // ======= INIT =======
