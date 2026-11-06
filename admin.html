@@ -598,6 +598,27 @@ details.fold[open]>summary::after{content:"−"}
       <p class="hint">A validade é verificada pelo horário local do cliente. O preço final é recalculado no cardápio e no carrinho.</p>
     </section>
 
+    <section class="promo-box" id="giftManager">
+      <h3>🎁 Leve e ganhe (brindes)</h3>
+      <div class="hint">Crie promoções do tipo “na compra de 2 hambúrgueres, ganhe 1 refri mini”. O site mostra o aviso, libera o brinde sozinho no carrinho e coloca na mensagem do WhatsApp. Se o brinde estiver esgotado no estoque, a promoção some do site.</div>
+      <div class="cost-form">
+        <div class="wide"><label for="giftName">Nome da promoção</label><input id="giftName" maxlength="80" placeholder="Ex.: Leve 2, ganhe refri mini"></div>
+        <div><label for="giftBuyQty">Na compra de (qtd)</label><input id="giftBuyQty" type="number" min="1" max="20" step="1" value="2"></div>
+        <div><label for="giftTarget">Quais itens contam</label><select id="giftTarget"></select></div>
+        <div><label for="giftItem">Brinde</label><select id="giftItem"></select></div>
+        <div><label for="giftQty">Qtd do brinde</label><input id="giftQty" type="number" min="1" max="10" step="1" value="1"></div>
+        <div class="wide"><label for="giftBadge">Texto no site (opcional)</label><input id="giftBadge" maxlength="90" placeholder="Em branco = texto automático"></div>
+        <div><label for="giftStart">Início (opcional)</label><input id="giftStart" type="datetime-local"></div>
+        <div><label for="giftEnd">Fim (opcional)</label><input id="giftEnd" type="datetime-local"></div>
+        <div class="wide"><label class="check-row" style="margin-top:0"><input id="giftRepeat" type="checkbox"> 🔁 Repete: a cada X itens ganha de novo (ex.: leve 4, ganhe 2)</label></div>
+        <div class="wide"><label class="check-row" style="margin-top:0"><input id="giftCombos" type="checkbox"> 🍔 Hambúrgueres dentro de combos também contam</label></div>
+        <div class="wide"><label class="check-row" style="margin-top:0"><input id="giftActive" type="checkbox" checked> ✅ Promoção ativa</label></div>
+        <div class="wide preview-box" id="giftPreview"></div>
+        <div class="wide btn-row" style="margin-top:0"><button class="cost-btn" type="button" id="giftSave">＋ Adicionar promoção</button><button class="refresh-btn" type="button" id="giftCancel" style="display:none">Cancelar edição</button></div>
+      </div>
+      <div id="giftList"><p class="hint">Carregando promoções…</p></div>
+    </section>
+
     <div class="save-bar">
       <button class="save-btn" id="savePromos">💾 Salvar promoções</button>
       <div class="save-msg" id="saveMsg" aria-live="polite"></div>
@@ -2242,6 +2263,121 @@ on conflict (code) do nothing;
     try{const {data,error}=await supabaseClient.from("settings").select("value").eq("key","promo_campaigns").maybeSingle();if(!error&&data&&Array.isArray(data.value))promoCampaigns=data.value;}
     catch(e){console.warn("Campanhas indisponíveis",e);}
     renderCampaigns();updateCampaignPreview();
+  })();
+
+  // ======= LEVE E GANHE (brindes) =======
+  // Guardado na tabela settings, chave gift_promos. O site lê e libera o brinde sozinho no carrinho.
+  let giftPromos = [];
+  let editingGiftId = null;
+  const GIFT_ITEMS = {
+    refri220: "Refri Lata Mini (220 ml)", refri: "Refri em Lata", refri1l: "Refrigerante 1 Litro", refri2l: "Refrigerante 2 Litros",
+    fritas_p: "Batata Frita Pequena", fritas_m: "Batata Frita Média", fritas_g: "Batata Frita Grande"
+  };
+  const gEl = id => document.getElementById(id);
+  function giftIsLive(g, now = new Date()){
+    return g.active !== false && (!g.startAt || new Date(g.startAt) <= now) && (!g.endAt || new Date(g.endAt) >= now);
+  }
+  function giftAutoText(g){
+    const n = Number(g.buyQty) || 1, q = Number(g.giftQty) || 1;
+    const what = g.target && g.target !== "any" ? (campaignBurgerNames[g.target] || g.target) : (n > 1 ? "hambúrgueres" : "hambúrguer");
+    return (g.repeat ? "A cada " + n : "Na compra de " + n) + " " + what + ", ganhe " + q + "× " + (GIFT_ITEMS[g.gift] || g.gift);
+  }
+  function giftFillSelects(){
+    gEl("giftTarget").innerHTML = '<option value="any">Qualquer hambúrguer</option>' + Object.entries(campaignBurgerNames).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("");
+    gEl("giftItem").innerHTML = Object.entries(GIFT_ITEMS).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("");
+    gEl("giftItem").value = "refri220";
+  }
+  function giftReadForm(){
+    const startRaw = gEl("giftStart").value, endRaw = gEl("giftEnd").value;
+    return {
+      id: editingGiftId || ("gift_" + Date.now()),
+      name: gEl("giftName").value.trim(),
+      buyQty: Math.floor(Number(gEl("giftBuyQty").value)),
+      target: gEl("giftTarget").value,
+      gift: gEl("giftItem").value,
+      giftQty: Math.floor(Number(gEl("giftQty").value)),
+      badge: gEl("giftBadge").value.trim(),
+      repeat: gEl("giftRepeat").checked,
+      countCombos: gEl("giftCombos").checked,
+      startAt: startRaw ? new Date(startRaw).toISOString() : null,
+      endAt: endRaw ? new Date(endRaw).toISOString() : null,
+      active: gEl("giftActive").checked
+    };
+  }
+  function giftUpdatePreview(){
+    const g = giftReadForm();
+    gEl("giftPreview").textContent = "Como aparece no site: 🎁 " + (g.badge || giftAutoText(g));
+  }
+  function giftResetForm(){
+    editingGiftId = null;
+    ["giftName","giftBadge","giftStart","giftEnd"].forEach(id => gEl(id).value = "");
+    gEl("giftBuyQty").value = "2"; gEl("giftQty").value = "1"; gEl("giftTarget").value = "any"; gEl("giftItem").value = "refri220";
+    gEl("giftRepeat").checked = false; gEl("giftCombos").checked = false; gEl("giftActive").checked = true;
+    gEl("giftSave").textContent = "＋ Adicionar promoção"; gEl("giftCancel").style.display = "none";
+    giftUpdatePreview();
+  }
+  function giftEdit(id){
+    const g = giftPromos.find(x => x.id === id); if (!g) return;
+    editingGiftId = id;
+    gEl("giftName").value = g.name || ""; gEl("giftBuyQty").value = g.buyQty; gEl("giftTarget").value = g.target || "any";
+    gEl("giftItem").value = g.gift; gEl("giftQty").value = g.giftQty; gEl("giftBadge").value = g.badge || "";
+    gEl("giftRepeat").checked = !!g.repeat; gEl("giftCombos").checked = !!g.countCombos; gEl("giftActive").checked = g.active !== false;
+    gEl("giftStart").value = g.startAt ? cpLocalInput(g.startAt) : ""; gEl("giftEnd").value = g.endAt ? cpLocalInput(g.endAt) : "";
+    gEl("giftSave").textContent = "Salvar alterações"; gEl("giftCancel").style.display = "";
+    giftUpdatePreview();
+    gEl("giftManager").scrollIntoView({ behavior: "smooth" });
+  }
+  function giftRender(){
+    const host = gEl("giftList");
+    if (!giftPromos.length){ host.innerHTML = '<p class="hint">Nenhuma promoção de brinde ainda. Crie a primeira acima.</p>'; return; }
+    host.innerHTML = giftPromos.map(g => {
+      const status = giftIsLive(g) ? "ATIVA AGORA" : (g.active === false ? "PAUSADA" : "FORA DA VALIDADE");
+      const when = (g.startAt || g.endAt) ? " · " + (g.startAt ? "de " + new Date(g.startAt).toLocaleDateString("pt-BR") : "") + (g.endAt ? " até " + new Date(g.endAt).toLocaleDateString("pt-BR") : "") : "";
+      return `<div class="cost-row"><div style="display:flex;justify-content:space-between;gap:8px"><strong>🎁 ${esc(g.name || giftAutoText(g))}</strong><span>${status}</span></div>
+        <div>${esc(giftAutoText(g))}${g.countCombos ? " · conta burgers de combos" : ""}${esc(when)}</div>
+        <div class="btn-row" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="mini-btn" type="button" data-gift-toggle="${esc(g.id)}">${g.active === false ? "Ativar" : "Pausar"}</button>
+          <button class="mini-btn" type="button" data-gift-edit="${esc(g.id)}">Editar</button>
+          <button class="mini-btn" type="button" data-gift-delete="${esc(g.id)}">Excluir</button>
+        </div></div>`;
+    }).join("");
+    host.querySelectorAll("[data-gift-edit]").forEach(b => b.onclick = () => giftEdit(b.dataset.giftEdit));
+    host.querySelectorAll("[data-gift-toggle]").forEach(b => b.onclick = async () => {
+      const g = giftPromos.find(x => x.id === b.dataset.giftToggle); if (!g) return;
+      g.active = g.active === false; await giftSave();
+    });
+    host.querySelectorAll("[data-gift-delete]").forEach(b => b.onclick = async () => {
+      if (!confirm("Excluir esta promoção de brinde?")) return;
+      giftPromos = giftPromos.filter(x => x.id !== b.dataset.giftDelete);
+      if (editingGiftId === b.dataset.giftDelete) giftResetForm();
+      await giftSave();
+    });
+  }
+  async function giftSave(){
+    const box = gEl("giftPreview");
+    const { error } = await supabaseClient.from("settings").upsert({ key: "gift_promos", value: giftPromos, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    if (error){ box.textContent = "Não foi possível salvar. Confira a tabela settings e as permissões do Supabase."; return false; }
+    giftRender(); box.textContent = "✅ Promoções de brinde salvas. O site atualiza sozinho em até 15 segundos.";
+    return true;
+  }
+  gEl("giftSave").onclick = async () => {
+    const g = giftReadForm();
+    if (!g.name) return alert("Dê um nome para a promoção.");
+    if (!(g.buyQty >= 1 && g.buyQty <= 20)) return alert("A quantidade da compra precisa estar entre 1 e 20.");
+    if (!(g.giftQty >= 1 && g.giftQty <= 10)) return alert("A quantidade do brinde precisa estar entre 1 e 10.");
+    if (g.startAt && g.endAt && new Date(g.endAt) <= new Date(g.startAt)) return alert("O fim precisa ser depois do início.");
+    giftPromos = editingGiftId ? giftPromos.map(x => x.id === editingGiftId ? g : x) : [...giftPromos, g];
+    if (await giftSave()) giftResetForm(), gEl("giftPreview").textContent = "✅ Promoção salva. O site atualiza sozinho em até 15 segundos.";
+  };
+  gEl("giftCancel").onclick = giftResetForm;
+  ["giftName","giftBuyQty","giftTarget","giftItem","giftQty","giftBadge","giftRepeat"].forEach(id => gEl(id).addEventListener("input", giftUpdatePreview));
+  (async function initGifts(){
+    giftFillSelects(); giftUpdatePreview();
+    try {
+      const { data, error } = await supabaseClient.from("settings").select("value").eq("key", "gift_promos").maybeSingle();
+      if (!error && data && Array.isArray(data.value)) giftPromos = data.value;
+    } catch(e){ console.warn("Promoções de brinde indisponíveis", e); }
+    giftRender();
   })();
 
   // ======= CUPONS =======

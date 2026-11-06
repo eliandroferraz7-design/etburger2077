@@ -497,6 +497,11 @@
     margin-top: 8px;
   }
   .combo-field{ margin-top: 10px; }
+  .combo-note{
+    margin: 8px 0 2px; padding: 8px 10px; border-radius: 8px;
+    font-family:'Oswald', sans-serif; font-size: 12.5px; line-height: 1.45; letter-spacing:.2px;
+    background:#fff3cf; border:1.5px dashed #c98a00; color:#5e4300;
+  }
   .combo-field label{
     display:block;
     font-family:'Oswald', sans-serif;
@@ -898,13 +903,96 @@
   .launch-panel.opened{border-color:#8de8a1;}
   .launch-panel.opened .launch-count{color:#8de8a1;text-shadow:2px 2px 0 var(--teal);}
   .ufo-fly.closed-flight{animation-duration:15s;filter:drop-shadow(0 0 10px rgba(232,169,58,.95));}
-  body.area51-mode{--mustard:#b9ff4b;--mustard-2:#91d52b;--teal:#073f43;}
-  body.area51-mode .hero{background:radial-gradient(ellipse at 50% 25%,rgba(58,255,131,.2),transparent 50%),var(--space);}
-  body.area51-mode .stars{opacity:1;animation:twinkle .65s ease-in-out infinite alternate;}
-  body.area51-mode .nav{border-bottom-color:#b9ff4b;}
-  body.area51-mode .hero-logo{filter:drop-shadow(0 0 13px rgba(185,255,75,.55));}
-  .area51-toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);z-index:9999;background:#091b20;color:#b9ff4b;border:2px solid #b9ff4b;border-radius:14px;padding:12px 17px;box-shadow:0 0 25px #4cff8b55;font:700 13px 'Oswald',sans-serif;letter-spacing:1px;text-align:center;opacity:0;pointer-events:none;transition:.3s ease;max-width:90vw;}
-  .area51-toast.show{opacity:1;transform:translate(-50%,0);}
+  /* ============ EASTER EGG: MODO ÁREA 51 (NEON) — 3 toques na logo ============ */
+  body.area51-mode{ --mustard:#b9ff4b; --mustard-2:#91d52b; --teal:#073f43; --neon:#b9ff4b; --neon-2:#2ef2ff; --neon-3:#ff3df2; }
+  body.area51-mode .hero{
+    background: radial-gradient(ellipse at 50% 18%, rgba(46,242,255,.17), transparent 55%),
+                radial-gradient(ellipse at 50% 100%, rgba(255,61,242,.2), transparent 58%), #050a12;
+  }
+  body.area51-mode .hero::after{               /* chão em grade, estilo synthwave */
+    content:""; position:absolute; left:-50%; right:-50%; bottom:0; height:46%; z-index:0; pointer-events:none;
+    background:
+      linear-gradient(to top, rgba(255,61,242,.3), transparent 70%),
+      repeating-linear-gradient(90deg, rgba(46,242,255,.6) 0 2px, transparent 2px 64px),
+      repeating-linear-gradient(0deg, rgba(46,242,255,.6) 0 2px, transparent 2px 48px);
+    transform: perspective(380px) rotateX(62deg); transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(to top, #000 35%, transparent); mask-image: linear-gradient(to top, #000 35%, transparent);
+    animation: neon-grid 1.3s linear infinite;
+  }
+  @keyframes neon-grid{ to{ background-position: 0 0, 0 0, 0 48px; } }
+  body.area51-mode .stars{ opacity:1; animation: twinkle .65s ease-in-out infinite alternate; }
+  body.area51-mode .nav{ border-bottom: 2px solid var(--neon); box-shadow: 0 0 18px rgba(185,255,75,.5); }
+  body.area51-mode .hero-logo,
+  body.area51-mode .nav-logo-img{
+    filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px #b9ff4b) drop-shadow(0 0 26px #2ef2ff) drop-shadow(0 0 48px #ff3df2);
+  }
+  body.area51-mode .hero-logo{ animation: logo-float 3.8s ease-in-out infinite, neon-flicker 4.6s linear infinite; }
+  body.area51-mode .nav-logo-img{ animation: neon-flicker 4.6s linear infinite; }
+  @keyframes neon-flicker{
+    0%,18%,22%,25%,53%,57%,100%{ opacity:1; filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px #b9ff4b) drop-shadow(0 0 26px #2ef2ff) drop-shadow(0 0 48px #ff3df2); }
+    20%,24%,55%{ opacity:.82; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 4px #b9ff4b); }
+  }
+  body.area51-mode .btn-primary,
+  body.area51-mode .nav-cta{ box-shadow: 0 0 0 2px #050a12, 0 0 16px var(--neon), 0 0 34px rgba(46,242,255,.55); animation: neon-pulse 1.8s ease-in-out infinite; }
+  @keyframes neon-pulse{ 50%{ box-shadow: 0 0 0 2px #050a12, 0 0 24px var(--neon), 0 0 52px rgba(255,61,242,.6); } }
+  body.area51-mode .item-card{ box-shadow: 0 0 0 2px #0a1420, 0 0 16px rgba(46,242,255,.4); }
+  body.area51-mode .item-price{ text-shadow: 0 0 10px rgba(185,255,75,.85); }
+  .logo-wrap.tap{ animation: neon-tap .28s ease-out; }
+  @keyframes neon-tap{ 50%{ transform: scale(1.05); filter: brightness(1.5); } }
+
+  .neon-fx{ position:fixed; inset:0; z-index:9998; pointer-events:none; overflow:hidden; visibility:hidden; }
+  .neon-fx.run{ visibility:visible; }
+  .neon-fx::before{ content:""; position:absolute; inset:0; background:#b9ff4b; opacity:0; }
+  .neon-fx.run::before{ animation: neon-flash .55s ease-out; }
+  @keyframes neon-flash{ 0%{ opacity:.55; } 100%{ opacity:0; } }
+  .neon-scan{ position:absolute; left:0; right:0; top:-4%; height:6px; opacity:0;
+    background: linear-gradient(90deg, transparent, #fff, #2ef2ff, #fff, transparent);
+    box-shadow: 0 0 22px 6px rgba(46,242,255,.8), 0 0 60px 14px rgba(185,255,75,.5); }
+  .neon-fx.run .neon-scan{ animation: neon-scan 1s cubic-bezier(.5,0,.3,1) .1s forwards; }
+  @keyframes neon-scan{ 0%{ top:-4%; opacity:1; } 100%{ top:104%; opacity:1; } }
+  .neon-ufo{ position:absolute; top:22%; left:-20%; font-size:46px; opacity:0;
+    filter: drop-shadow(0 0 12px #b9ff4b) drop-shadow(0 0 26px #2ef2ff); }
+  .neon-fx.run .neon-ufo{ animation: neon-ufo 1.7s ease-in-out .25s forwards; }
+  @keyframes neon-ufo{ 0%{ left:-20%; top:22%; opacity:1; transform:rotate(-8deg); } 50%{ top:13%; transform:rotate(6deg); } 100%{ left:118%; top:24%; opacity:1; transform:rotate(-6deg); } }
+
+  .neon-sign{
+    position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom,0px)); z-index:9999; width:max-content; max-width:min(92vw,360px); text-align:center;
+    padding:12px 22px 14px; border-radius:16px; background:rgba(5,10,18,.9); border:2px solid #b9ff4b;
+    box-shadow: 0 0 14px #b9ff4b, inset 0 0 14px rgba(185,255,75,.35), 0 0 40px rgba(46,242,255,.5);
+    opacity:0; pointer-events:none; transform: translate(-50%,16px) scale(.92); transition: opacity .25s, transform .25s;
+  }
+  .neon-sign.show{ opacity:1; pointer-events:auto; transform: translate(-50%,0) scale(1); }
+  .neon-sign-k{ display:block; font:700 10.5px 'Oswald',sans-serif; letter-spacing:3px; color:#2ef2ff; text-shadow:0 0 8px #2ef2ff; }
+  .neon-sign b{ display:block; margin:2px 0; font:400 30px 'Alfa Slab One',cursive; letter-spacing:2px; color:#fff;
+    text-shadow: 0 0 4px #fff, 0 0 12px #b9ff4b, 0 0 28px #b9ff4b, 0 0 46px #ff3df2; animation: neon-text 3s linear infinite; }
+  @keyframes neon-text{ 0%,19%,23%,54%,100%{ opacity:1; } 21%,55%{ opacity:.55; } }
+  .neon-sign-s{ display:block; font:600 12px 'Oswald',sans-serif; letter-spacing:1.5px; text-transform:uppercase; color:#b9ff4b; text-shadow:0 0 8px rgba(185,255,75,.8); }
+  .neon-code{ margin-top:10px; font:700 14px 'Oswald',sans-serif; letter-spacing:2px; color:#050a12; background:#b9ff4b;
+    border:0; border-radius:10px; padding:9px 14px; box-shadow:0 0 16px #b9ff4b; cursor:pointer; }
+  .neon-dot{ position:fixed; z-index:9997; pointer-events:none; font-size:14px; text-shadow:0 0 8px currentColor; animation: neon-dot .9s ease-out forwards; }
+  @keyframes neon-dot{ 0%{ opacity:1; transform:translate(0,0) scale(1); } 100%{ opacity:0; transform:translate(var(--dx),var(--dy)) scale(.3); } }
+  @media (prefers-reduced-motion: reduce){
+    body.area51-mode .hero::after, body.area51-mode .hero-logo, body.area51-mode .nav-logo-img,
+    body.area51-mode .btn-primary, body.area51-mode .nav-cta, .neon-sign b{ animation:none !important; }
+    .neon-fx, .neon-dot{ display:none !important; }
+  }
+
+  /* ============ LEVE E GANHE (brindes criados no painel) ============ */
+  .gift-banner{ display:flex; flex-wrap:wrap; gap:8px; }
+  .gift-pill{
+    display:inline-flex; align-items:center; gap:8px; font-family:'Oswald',sans-serif; font-weight:700; font-size:14px; letter-spacing:.3px;
+    color:#fff; background:linear-gradient(135deg, var(--rust), #e0561a); border:2px solid var(--ink); border-radius:999px;
+    padding:7px 14px; box-shadow:3px 3px 0 var(--ink); animation: gift-bob 2.8s ease-in-out infinite;
+  }
+  @keyframes gift-bob{ 0%,100%{ transform:translateY(0) rotate(-.6deg); } 50%{ transform:translateY(-3px) rotate(.6deg); } }
+  .drawer-gift{ display:flex; gap:10px; align-items:flex-start; margin:10px 0; padding:10px 12px; border-radius:12px; font-family:'Oswald',sans-serif; font-size:14px; line-height:1.4; }
+  .drawer-gift.on{ background:#e8f6e6; border:2px solid #2f8f4a; color:#17421f; animation: gift-pop .5s cubic-bezier(.2,1.4,.4,1) both; }
+  .drawer-gift.hint{ background:#fff3cf; border:2px dashed #c98a00; color:#5e4300; }
+  .drawer-gift .dg-ic{ font-size:22px; line-height:1; }
+  .drawer-gift small{ display:block; opacity:.75; font-size:11.5px; margin-top:2px; }
+  .dg-free{ font-weight:700; letter-spacing:1px; color:#1b7a36; }
+  @keyframes gift-pop{ from{ opacity:0; transform:scale(.85); } to{ opacity:1; transform:scale(1); } }
+  @media (prefers-reduced-motion: reduce){ .gift-pill, .drawer-gift.on{ animation:none; } }
   .nav-logo,.hero-logo{cursor:pointer;}
   @keyframes panel-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   @keyframes alert-glow{0%,100%{box-shadow:0 0 12px rgba(255,91,56,.18)}50%{box-shadow:0 0 30px rgba(255,91,56,.45)}}
@@ -1147,6 +1235,7 @@
   </div>
 
   <div class="combo-promo-banner" id="comboPromoBanner" style="display:none;"></div>
+  <div class="combo-promo-banner gift-banner" id="giftBanner" style="display:none;"></div>
 
   <div class="menu-grid" id="menu-grid"></div>
 </section>
@@ -1249,7 +1338,13 @@
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite">Item adicionado ao pedido</div>
-<div class="area51-toast" id="area51Toast" role="status" aria-live="polite">🛸 ACESSO CONFIDENCIAL LIBERADO — MODO ÁREA 51</div>
+<div class="neon-fx" id="neonFx" aria-hidden="true"><div class="neon-scan"></div><div class="neon-ufo">🛸</div></div>
+<div class="neon-sign" id="neonSign" role="status" aria-live="polite">
+  <span class="neon-sign-k">// SINAL INTERCEPTADO</span>
+  <b id="neonSignT">ÁREA 51</b>
+  <span class="neon-sign-s" id="neonSignS">acesso confidencial liberado</span>
+  <button type="button" class="neon-code" id="neonCode" style="display:none"></button>
+</div>
 
 <script>
   // ======= CONFIG =======
@@ -1533,20 +1628,43 @@
   }
 
   function comboActive(key){
-    return !isComboOff(key) && comboSelections[key].burgers.every(Boolean);
+    return !isComboOff(key) && comboSelections[key].burgers.every(Boolean)
+      && !(HIDE_COMBO_WHEN_DRINK_OUT && isSoldOut(COMBO_DEFAULTS[key].drink));
   }
   function activeComboKeys(){
     normalizeComboSelections();
     return Object.keys(COMBOS).filter(comboActive);
   }
 
+  // O texto do combo segue o que realmente existe: o refri que está escolhido e os tamanhos de batata disponíveis.
+  const DRINK_PHRASE = { refri: "refrigerante em lata", refri1l: "refrigerante de 1 litro", refri2l: "refrigerante de 2 litros" };
+  const DRINK_LABEL  = { refri: "O refri em lata", refri1l: "O refri de 1 litro", refri2l: "O refri de 2 litros" };
+  const FRIES_SIZE   = { fritas_p: "pequena", fritas_m: "média", fritas_g: "grande" };
+  // true = o combo some da vitrine quando o refri "de vitrine" dele (1 L / 2 L / lata) está esgotado
+  const HIDE_COMBO_WHEN_DRINK_OUT = false;
+
+  function friesPhrase(){
+    const sizes = menuData.fritas.filter(f => !isSoldOut(f.id)).map(f => FRIES_SIZE[f.id] || f.name.toLowerCase());
+    if (!sizes.length) return "";
+    if (sizes.length === 1) return `batata ${sizes[0]}`;
+    return `batata ${sizes.slice(0, -1).join(", ")} ou ${sizes[sizes.length - 1]} à escolha`;
+  }
   function comboDesc(key){
     const sel = comboSelections[key];
     const n = COMBOS[key].burgers;
     const parts = [`${n} lanche${n > 1 ? "s" : ""} à sua escolha`];
-    if (sel.fries) parts.push("batata pequena, média ou grande à escolha");
-    if (sel.drink) parts.push(key === "individual" ? "refrigerante em lata" : key === "familia" ? "refrigerante de 2 litros" : "refrigerante de 1 litro");
-    return parts.join(" + ") + " — monte do seu jeito";
+    if (sel.fries) parts.push(friesPhrase());
+    if (sel.drink) parts.push(DRINK_PHRASE[sel.drink] || "refrigerante");
+    return parts.filter(Boolean).join(" + ") + " — monte do seu jeito";
+  }
+  // Aviso claro quando o item de vitrine do combo acabou e ele sai com outra opção (ou sem o item)
+  function comboNote(key){
+    const sel = comboSelections[key], def = COMBO_DEFAULTS[key];
+    const notes = [];
+    if (!sel.drink) notes.push("🥤 Sem refrigerante disponível agora — o combo sai sem refri.");
+    else if (sel.drink !== def.drink && isSoldOut(def.drink)) notes.push(`🥤 ${DRINK_LABEL[def.drink] || "O refri"} está esgotado hoje — este combo sai com ${DRINK_PHRASE[sel.drink] || "outro refrigerante"}.`);
+    if (!sel.fries) notes.push("🍟 Sem batata disponível agora — o combo sai sem batata.");
+    return notes.length ? `<div class="combo-note">${notes.join("<br>")}</div>` : "";
   }
 
   function comboPrice(key){
@@ -1894,6 +2012,7 @@
         </div>
         ${isFeatured ? `<div class="combo-discount-tag">⭐ combo do dia · ${pct}% OFF · você economiza ${fmt(subtotal - discounted)}</div>` : ""}
         <div class="item-desc">${comboDesc(key)}</div>
+        ${comboNote(key)}
         ${burgerSelects}
         ${friesSelect}
         ${drinkSelect}
@@ -2127,6 +2246,7 @@
     cartCount.textContent = totalQty + (totalQty === 1 ? " item na nave" : " itens na nave");
     cartTotal.textContent = fmt(subtotal());
     updateDrawer();
+    giftNotify();
   }
 
 
@@ -2307,6 +2427,8 @@
         </div>`).join("");
     }
 
+    if (entries.length) body.insertAdjacentHTML("beforeend", giftDrawerHtml());
+
     const t = orderTotals();
     const delPaid = t.del - t.deliveryDiscount;
     document.getElementById("drawerSubtotal").textContent = fmt(t.sub);
@@ -2414,6 +2536,7 @@
         });
       }
     });
+    giftLines().forEach(gl => lines.push(`🎁 ${gl.qty}x ${gl.name} — BRINDE (${gl.promo})`));
     lines.push("");
     lines.push(`Subtotal: ${fmt(sub)}`);
     if (t.itemsDiscount > 0) lines.push(`🎟️ Cupom ${t.coupon.code}: -${fmt(t.itemsDiscount)}`);
@@ -2509,7 +2632,7 @@
       customer_name: name,
       customer_address: type === "delivery" ? address : null,
       delivery_type: type,
-      items: cartItems().map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+      items: cartItems().map(i => ({ name: i.name, qty: i.qty, price: i.price })).concat(giftLines().map(gl => ({ name: "🎁 Brinde: " + gl.name + " (" + gl.promo + ")", qty: gl.qty, price: 0 }))),
       subtotal: sub,
       delivery_fee: type === "delivery" ? del : 0,
       total: grand,
@@ -2623,19 +2746,62 @@
   updateStatus();
   setInterval(updateStatus, 1000);
 
-  // Easter egg: toque 3 vezes na logo para ativar/desativar o Modo Área 51.
+  // Easter egg: toque 3 vezes na logo para ligar/desligar o Modo Área 51 (neon).
+  // Opcional: coloque aqui o código de um cupom secreto (crie o cupom na aba 🎟️ Cupons do painel) para ele aparecer ao ativar.
+  const EASTER_EGG_COUPON = "";
   (function(){
-    let taps=0, tapTimer=null, toastTimer=null;
-    function logoTap(e){
-      taps++; clearTimeout(tapTimer);
-      tapTimer=setTimeout(()=>{taps=0;},850);
-      if(taps>=3){
-        taps=0; document.body.classList.toggle("area51-mode");
-        const toast=document.getElementById("area51Toast");
-        if(toast){toast.textContent=document.body.classList.contains("area51-mode")?"🛸 ACESSO CONFIDENCIAL LIBERADO — MODO ÁREA 51":"🔒 MODO NORMAL RESTAURADO";toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2600);}
-      }
+    let taps = 0, tapTimer = null, signTimer = null, lastDot = 0;
+    const fx = document.getElementById("neonFx"), sign = document.getElementById("neonSign");
+    const signT = document.getElementById("neonSignT"), signS = document.getElementById("neonSignS"), codeBtn = document.getElementById("neonCode");
+    const vibrate = p => { try { navigator.vibrate && navigator.vibrate(p); } catch(e){} };
+
+    function runFx(){
+      if (!fx) return;
+      fx.classList.remove("run"); void fx.offsetWidth; fx.classList.add("run");
+      clearTimeout(runFx._t); runFx._t = setTimeout(() => fx.classList.remove("run"), 2100);
     }
-    document.querySelectorAll(".nav-logo-img,.hero-logo").forEach(el=>el.addEventListener("click",logoTap));
+    function showSign(on){
+      if (!sign) return;
+      signT.textContent = on ? "ÁREA 51" : "MODO NORMAL";
+      signS.textContent = on ? "acesso confidencial liberado" : "sinal restaurado • bom apetite";
+      const code = on ? EASTER_EGG_COUPON : "";
+      codeBtn.style.display = code ? "inline-block" : "none";
+      if (code) codeBtn.textContent = "🎟️ " + code + " · toque para copiar";
+      sign.classList.add("show");
+      clearTimeout(signTimer); signTimer = setTimeout(() => sign.classList.remove("show"), code ? 8000 : 3400);
+    }
+    if (codeBtn) codeBtn.addEventListener("click", () => {
+      const code = EASTER_EGG_COUPON; if (!code) return;
+      const ok = () => showToast("Cupom " + code + " copiado! Cole no carrinho 🎟️");
+      try { navigator.clipboard.writeText(code).then(ok, () => showToast("Seu cupom: " + code)); } catch(e){ showToast("Seu cupom: " + code); }
+    });
+    function toggleNeon(){
+      const on = document.body.classList.toggle("area51-mode");
+      runFx(); showSign(on); vibrate(on ? [30, 40, 30, 40, 90] : 40);
+    }
+    function logoTap(){
+      taps++; clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { taps = 0; }, 850);
+      document.querySelectorAll(".logo-wrap").forEach(w => { w.classList.remove("tap"); void w.offsetWidth; w.classList.add("tap"); });
+      if (taps >= 3){ taps = 0; toggleNeon(); } else vibrate(15);
+    }
+    // rastro de estrelinhas neon enquanto o modo está ligado
+    function trail(e){
+      if (reduceMotion || !document.body.classList.contains("area51-mode")) return;
+      const now = performance.now(); if (now - lastDot < 55) return; lastDot = now;
+      const pt = e.touches && e.touches[0] ? e.touches[0] : e;
+      const d = document.createElement("span");
+      d.className = "neon-dot";
+      d.textContent = ["✦", "✧", "⋆"][Math.floor(Math.random() * 3)];
+      d.style.left = pt.clientX + "px"; d.style.top = pt.clientY + "px";
+      d.style.color = ["#b9ff4b", "#2ef2ff", "#ff3df2"][Math.floor(Math.random() * 3)];
+      d.style.setProperty("--dx", (Math.random() * 40 - 20) + "px");
+      d.style.setProperty("--dy", (10 + Math.random() * 30) + "px");
+      document.body.appendChild(d); setTimeout(() => d.remove(), 900);
+    }
+    window.addEventListener("pointermove", trail, { passive: true });
+    window.addEventListener("touchmove", trail, { passive: true });
+    document.querySelectorAll(".nav-logo-img,.hero-logo").forEach(el => el.addEventListener("click", logoTap));
   })();
 
   // ======= TABS =======
@@ -2698,15 +2864,16 @@
     else { grid.innerHTML = `<div class="empty-combos">Nenhum item disponível no momento.</div>`; comboBanner.style.display = "none"; }
     renderDrinks();
     renderSpotlights();
+    renderGiftBanner();
   }
 
   // Busca estoque + promoções e redesenha só se algo mudou
   async function refreshRemote(){
-    const before = JSON.stringify([stockStatus, promos, remoteCatalog, remoteStoreOpen, customMenuSig]);
+    const before = JSON.stringify([stockStatus, promos, remoteCatalog, remoteStoreOpen, customMenuSig, giftPromos]);
     await loadCustomMenu();
-    await Promise.all([loadStock(), loadPromos(), loadStoreSetting()]);
+    await Promise.all([loadStock(), loadPromos(), loadStoreSetting(), loadGiftPromos()]);
     applyRemotePrices();
-    if (JSON.stringify([stockStatus, promos, remoteCatalog, remoteStoreOpen, customMenuSig]) !== before){
+    if (JSON.stringify([stockStatus, promos, remoteCatalog, remoteStoreOpen, customMenuSig, giftPromos]) !== before){
       // item desligado no painel sai também do carrinho de quem já tinha adicionado
       let removed = 0;
       Object.keys(cart).forEach(k => {
@@ -2717,6 +2884,7 @@
       updateCartUI();
       if (removed) showToast("Um item do seu pedido saiu do cardápio e foi removido");
     }
+    renderGiftBanner();
   }
 
   // A cada 15s e sempre que o cliente volta para a página: o que você mudar no painel some/aparece no site sem recarregar
@@ -2724,10 +2892,90 @@
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshRemote(); });
   window.addEventListener("focus", refreshRemote);
 
+  // ======= LEVE E GANHE (brindes criados no painel) =======
+  // settings.gift_promos = [{ id, name, buyQty, target:"any"|idDoBurger, gift:idDoItem, giftQty, repeat, countCombos, startAt, endAt, active, badge }]
+  let giftPromos = [];
+  let giftSeen = {};   // quantos brindes cada promoção já tinha liberado (para avisar só quando libera de novo)
+  const giftEsc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  async function loadGiftPromos(){
+    if (!supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient.from("settings").select("value").eq("key", "gift_promos").maybeSingle();
+      if (!error) giftPromos = data && Array.isArray(data.value) ? data.value : [];
+    } catch(e){ console.warn("Promoções de brinde indisponíveis", e); }
+  }
+  // só vale se estiver ativa, dentro da validade e com o brinde em estoque
+  function giftLive(g){
+    const now = Date.now();
+    return !!g && g.active !== false && Number(g.buyQty) >= 1 && Number(g.giftQty) >= 1
+      && (!g.startAt || new Date(g.startAt).getTime() <= now) && (!g.endAt || new Date(g.endAt).getTime() >= now)
+      && !!getItemById(g.gift) && !isSoldOut(g.gift);
+  }
+  function giftName(g){ const it = getItemById(g.gift); return it ? it.name : g.gift; }
+  function giftWhat(g, n){
+    if (g.target && g.target !== "any") return (allBurgers().find(b => b.id === g.target) || {}).name || g.target;
+    return n > 1 ? "hambúrgueres" : "hambúrguer";
+  }
+  function giftText(g){
+    if (g.badge && String(g.badge).trim()) return String(g.badge).trim();
+    const n = Number(g.buyQty), q = Number(g.giftQty);
+    return `${g.repeat ? "A cada " + n : "Na compra de " + n} ${giftWhat(g, n)}, ganhe ${q}× ${giftName(g)}`;
+  }
+  function giftUnits(g){
+    const ids = new Set(allBurgers().map(b => b.id));
+    let n = 0;
+    cartItems().forEach(i => {
+      if (i.comboKey && !g.countCombos) return;
+      (Array.isArray(i.parts) ? i.parts : []).forEach(id => {
+        if (ids.has(id) && (!g.target || g.target === "any" || g.target === id)) n += i.qty;
+      });
+    });
+    return n;
+  }
+  function giftStatus(){
+    return giftPromos.filter(giftLive).map(g => {
+      const need = Math.max(1, Math.floor(Number(g.buyQty)));
+      const per = Math.max(1, Math.floor(Number(g.giftQty)));
+      const units = giftUnits(g);
+      const sets = units >= need ? (g.repeat ? Math.floor(units / need) : 1) : 0;
+      const missing = units >= need ? (g.repeat ? need - (units % need) : 0) : need - units;
+      return { g, units, qty: sets * per, missing };
+    });
+  }
+  function giftLines(){
+    return giftStatus().filter(s => s.qty > 0).map(s => ({ name: giftName(s.g), qty: s.qty, promo: s.g.name || giftText(s.g) }));
+  }
+  function giftDrawerHtml(){
+    let html = "";
+    giftStatus().forEach(s => {
+      if (s.qty > 0) html += `<div class="drawer-gift on"><span class="dg-ic">🎁</span><div><b>Brinde liberado!</b><br>${s.qty}× ${giftEsc(giftName(s.g))} — <span class="dg-free">GRÁTIS</span><small>${giftEsc(s.g.name || giftText(s.g))}</small></div></div>`;
+      if (s.missing > 0){
+        const w = giftWhat(s.g, s.missing);
+        const msg = s.units > 0 ? `Falta${s.missing > 1 ? "m" : ""} <b>${s.missing}</b> ${giftEsc(w)} para ganhar` : `Adicione <b>${s.missing}</b> ${giftEsc(w)} e ganhe`;
+        html += `<div class="drawer-gift hint"><span class="dg-ic">🎯</span><div>${msg} ${Number(s.g.giftQty)}× ${giftEsc(giftName(s.g))}</div></div>`;
+      }
+    });
+    return html;
+  }
+  const giftBanner = document.getElementById("giftBanner");
+  function renderGiftBanner(){
+    const live = giftPromos.filter(giftLive);
+    if (!live.length){ giftBanner.style.display = "none"; giftBanner.innerHTML = ""; return; }
+    giftBanner.style.display = "flex";
+    giftBanner.innerHTML = live.map(g => `<span class="gift-pill">🎁 <span>${giftEsc(giftText(g))}</span></span>`).join("");
+  }
+  function giftNotify(){
+    giftStatus().forEach(s => {
+      const prev = giftSeen[s.g.id] || 0;
+      if (s.qty > prev) setTimeout(() => showToast("🎁 Brinde liberado: " + s.qty + "× " + giftName(s.g)), 380);
+      giftSeen[s.g.id] = s.qty;
+    });
+  }
+
   // ======= INIT =======
   (async function init(){
     await loadCustomMenu();
-    await Promise.all([loadStock(), loadPromos(), loadStoreSetting()]);
+    await Promise.all([loadStock(), loadPromos(), loadStoreSetting(), loadGiftPromos()]);
     applyRemotePrices();
     updateStatus();
     renderAll();
