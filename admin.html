@@ -568,7 +568,7 @@ details.fold[open]>summary::after{content:"−"}
         <option value="roswell">Roswell (XB) — X-Burger</option>
         <option value="area51">Área 51 (XS) — X-Salada</option>
         <option value="hangar18">Hangar 18 (XC) — X-Calabresa</option>
-        <option value="voyager">Cosmos (XBA) — X-Bacon</option>
+        <option value="voyager">Voyager (XBA) — X-Bacon</option>
         <option value="supernova">Supernova (XCB) — X-Calabacon</option>
         <option value="darkside">Darkside (XBD) — X-Burger Duplo</option>
         <option value="parallax">Parallax (XSD) — X-Salada Duplo</option>
@@ -583,7 +583,7 @@ details.fold[open]>summary::after{content:"−"}
       <div class="cost-form">
         <div><label for="campaignName">Nome da campanha</label><input id="campaignName" maxlength="80" placeholder="Ex.: Sextou ET"></div>
         <div><label for="campaignType">Tipo</label><select id="campaignType"><option value="burger">Hambúrguer avulso</option><option value="combo">Combo</option></select></div>
-        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Cosmos</option><option value="supernova">Supernova</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option></select></div>
+        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="supernova">Supernova</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option></select></div>
         <div><label for="campaignDiscountType">Desconto</label><select id="campaignDiscountType"><option value="percentual">Percentual (%)</option><option value="preco">Preço promocional (R$)</option></select></div>
         <div><label for="campaignValue">Valor</label><input id="campaignValue" type="number" min="0.01" step="0.01" value="10"></div>
         <div><label for="campaignBasePrice">Preço normal (R$)</label><input id="campaignBasePrice" type="number" min="0.01" step="0.01" placeholder="Ex.: 20,00"></div>
@@ -948,7 +948,7 @@ details.fold[open]>summary::after{content:"−"}
     if (error){ wrap.innerHTML = "Erro ao carregar estoque. Confira a chave do Supabase."; return; }
     // Itens Smash antigos ficam preservados no Supabase, mas não aparecem mais no painel.
     stockRows = (data || []).filter(r => !String(r.item_id || "").endsWith("_s"));
-    stockRows.forEach(r => { if (r.item_id === "voyager") r.name = "COSMOS"; });   // mesmo item, novo nome
+    stockRows.forEach(r => { if (r.item_id === "voyager") r.name = "VOYAGER"; });   // nome de exibição do item voyager
     COMBO_ROWS.forEach(c => {
       if (!stockRows.some(r => r.item_id === c.item_id)) stockRows.push({ item_id:c.item_id, name:c.name, available:true, _virtual:true });
     });
@@ -1350,7 +1350,7 @@ on conflict (code) do nothing;
   //   manual       = { combo:{...}, burger:{...} }
   const DAYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const COMBO_LIST = [["individual","Combo Solo"],["casal","Dupla Cósmica"],["tripulacao","Tripulação"],["familia","Família Galáctica"]];
-  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Cosmos"],["supernova","Supernova"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"]];
+  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["supernova","Supernova"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"]];
   const BURGER_DEFAULT_PRICE = { roswell:20, area51:22, hangar18:24, voyager:30, supernova:30, darkside:30, parallax:36, sputnik:42, mothership:38 };
   const LINE_KEY = "line:classica";
   const COMBO_LABEL = Object.fromEntries(COMBO_LIST);
@@ -2166,7 +2166,7 @@ on conflict (code) do nothing;
   // Campanhas independentes: guardadas na mesma tabela settings, chave promo_campaigns.
   let promoCampaigns = [];
   let editingCampaignId = null;
-  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Cosmos",supernova:"Supernova",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership"};
+  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",supernova:"Supernova",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership"};
   const campaignComboNames = {individual:"Combo Solo",casal:"Dupla Cósmica",tripulacao:"Tripulação",familia:"Família Galáctica"};
   const campaignMoney = n => Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
   function campaignIsLive(c, now=new Date()){
