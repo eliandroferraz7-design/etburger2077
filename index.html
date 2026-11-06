@@ -1362,7 +1362,7 @@
       { id: "parallax", name: "PARALLAX", price: 36.00, desc: "Pão de brioche, 2x blend 120g, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
       { id: "mothership", name: "MOTHERSHIP", price: 38.00, desc: "Pão de brioche, 2x blend 120g, calabresa fatiada, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
       { id: "sputnik", name: "SPUTNIK", price: 42.00, desc: "Pão de brioche, 3x blend 120g, mussarela em triplo, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND", premium: true, tag: "O Premium da Casa" },
-      { id: "prometheus", name: "PROMETHEUS", price: 48.00, desc: "Pão de brioche, 3x blend 120g, calabresa fatiada, mussarela em triplo, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND" }
+      { id: "prometheus", name: "PROMETHEUS", price: 48.00, desc: "Pão de brioche, 3x blend 120g, calabresa fatiada, mussarela em triplo, ovo, presunto, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND", seal: "🧬 ORIGEM DESCONHECIDA", stamp: "ULTRASSECRETO", tag: "O mais completo da galáxia" }
     ],
     fritas: [
       { id: "fritas_p", name: "BATATA FRITA PEQUENA", price: 10.00, desc: "Porção individual, crocante" },
@@ -1775,22 +1775,22 @@
       comboBanner.style.display = "none";
     }
     const GRP = i => /^3X/i.test(i.badge||"") ? 2 : /^2X/i.test(i.badge||"") ? 1 : 0;
-    const GRP_INFO = [["MISSÃO 01","CLÁSSICOS","blend 120g · brioche, alface, tomate e maionese"],["MISSÃO 02","DUPLOS","2x blend 120g · mussarela em dobro"],["PROTOCOLO SPUTNIK","TRIPLO","3x blend 120g · o premium da casa"]];
+    const GRP_INFO = [["MISSÃO 01","CLÁSSICOS","blend 120g · brioche, alface, tomate e maionese"],["MISSÃO 02","DUPLOS","2x blend 120g · mussarela em dobro"],["PROTOCOLO TRIPLO","TRIPLOS","3x blend 120g · mussarela em triplo"]];
     let lastGrp = -1, nth = 0;
     [...visibleItems(menuData[line])].sort((a,b)=>GRP(a)-GRP(b)).forEach(item => {
       const g = GRP(item); nth++;
       if (g !== lastGrp){ lastGrp = g; const h = document.createElement("div"); h.className = "menu-sec"; h.innerHTML = `<span class="menu-sec-k">${GRP_INFO[g][0]}</span><span class="menu-sec-t">${GRP_INFO[g][1]}</span><span class="menu-sec-s">${GRP_INFO[g][2]}</span>`; grid.appendChild(h); }
       const out = isSoldOut(item.id);
       const card = document.createElement("div");
-      card.className = "item-card visible" + (item.premium ? " premium" : "") + (g === 1 ? " duplo" : "") + (out ? " sold-out" : "");
+      card.className = "item-card visible" + ((item.premium || item.seal) ? " premium" : "") + (g === 1 ? " duplo" : "") + (out ? " sold-out" : "");
       const ep = effectivePrice(item);
       const priceHtml = ep.pct
         ? `<div class="price-box"><span class="combo-price-old">${fmt(ep.old)}</span><span class="item-price">${fmt(ep.price)}</span></div>`
         : `<div class="item-price">${fmt(item.price)}</div>`;
       card.innerHTML = `
-        ${item.premium ? `<div class="premium-tag">★ PREMIUM</div>` : ""}
+        ${(item.seal || item.premium) ? `<div class="premium-tag">${item.seal || "★ PREMIUM"}</div>` : ""}
         <div class="dossie">ARQUIVO #${String(nth).padStart(2,"0")} · BLEND ${"●".repeat(g+1)}${["roswell","area51"].includes(item.id) ? ` · <b>⭐ MAIS PEDIDO</b>` : ""}</div>
-        ${item.premium ? `<div class="carimbo">CONFIDENCIAL</div>` : ""}
+        ${(item.stamp || item.premium) ? `<div class="carimbo">${item.stamp || "CONFIDENCIAL"}</div>` : ""}
         <div class="item-top">
           <div class="item-name">${item.name}${item.badge ? `<span class="item-badge">${item.badge}</span>` : ""}${out ? `<span class="sold-out-tag">ESGOTADO</span>` : ""}</div>
           ${priceHtml}
