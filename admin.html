@@ -574,6 +574,7 @@ details.fold[open]>summary::after{content:"−"}
         <option value="parallax">Parallax (XSD) — X-Salada Duplo</option>
         <option value="sputnik">Sputnik (XBT) — X-Burger Triplo</option>
         <option value="mothership">Mothership (XCD) — X-Calabresa Duplo</option>
+        <option value="prometheus">Prometheus (XCT) — X-Calabresa Triplo</option>
       </select>
     </section>
 
@@ -583,7 +584,7 @@ details.fold[open]>summary::after{content:"−"}
       <div class="cost-form">
         <div><label for="campaignName">Nome da campanha</label><input id="campaignName" maxlength="80" placeholder="Ex.: Sextou ET"></div>
         <div><label for="campaignType">Tipo</label><select id="campaignType"><option value="burger">Hambúrguer avulso</option><option value="combo">Combo</option></select></div>
-        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="supernova">Supernova</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option></select></div>
+        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="supernova">Supernova</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option><option value="prometheus">Prometheus</option></select></div>
         <div><label for="campaignDiscountType">Desconto</label><select id="campaignDiscountType"><option value="percentual">Percentual (%)</option><option value="preco">Preço promocional (R$)</option></select></div>
         <div><label for="campaignValue">Valor</label><input id="campaignValue" type="number" min="0.01" step="0.01" value="10"></div>
         <div><label for="campaignBasePrice">Preço normal (R$)</label><input id="campaignBasePrice" type="number" min="0.01" step="0.01" placeholder="Ex.: 20,00"></div>
@@ -944,7 +945,7 @@ details.fold[open]>summary::after{content:"−"}
       note:"Combo desligado some do site." },
     { key:"fritas",  title:"🍟 Fritas",                    match: id => id.startsWith("fritas_"),
       note:"Fritas desligadas também saem dos combos (o preço do combo é recalculado)." },
-    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["roswell","area51","hangar18","voyager","supernova","darkside","parallax","sputnik","mothership"].includes(id) || customBurgerIds.has(id) },
+    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["roswell","area51","hangar18","voyager","supernova","darkside","parallax","sputnik","mothership","prometheus"].includes(id) || customBurgerIds.has(id) },
     { key:"bebidas", title:"🥤 Bebidas",                   match: id => id.startsWith("refri") },
     { key:"outros",  title:"📦 Outros",                    match: () => true }
   ];
@@ -1371,8 +1372,8 @@ on conflict (code) do nothing;
   //   manual       = { combo:{...}, burger:{...} }
   const DAYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const COMBO_LIST = [["individual","Combo Solo"],["casal","Dupla Cósmica"],["tripulacao","Tripulação"],["familia","Família Galáctica"]];
-  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["supernova","Supernova"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"]];
-  const BURGER_DEFAULT_PRICE = { roswell:20, area51:22, hangar18:24, voyager:30, supernova:30, darkside:30, parallax:36, sputnik:42, mothership:38 };
+  const CLASSIC_BURGERS = [["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["supernova","Supernova"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"],["prometheus","Prometheus"]];
+  const BURGER_DEFAULT_PRICE = { roswell:20, area51:22, hangar18:24, voyager:30, supernova:30, darkside:30, parallax:36, sputnik:42, mothership:38, prometheus:48 };
   const LINE_KEY = "line:classica";
   const COMBO_LABEL = Object.fromEntries(COMBO_LIST);
   const BURGER_LABEL = Object.fromEntries(CLASSIC_BURGERS);
@@ -1875,6 +1876,7 @@ on conflict (code) do nothing;
       if(n.includes("parallax")) return "parallax";
       if(n.includes("sputnik")) return "sputnik";
       if(n.includes("mothership")) return "mothership";
+      if(n.includes("prometheus")) return "prometheus";
       const cb = customBurgers.find(b => n.includes(norm(b.name)));
       if(cb) return cb.id;
       if(n.includes("fritas") || n.includes("batata")) return "fritas";
@@ -2187,7 +2189,7 @@ on conflict (code) do nothing;
   // Campanhas independentes: guardadas na mesma tabela settings, chave promo_campaigns.
   let promoCampaigns = [];
   let editingCampaignId = null;
-  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",supernova:"Supernova",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership"};
+  const campaignBurgerNames = {roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",supernova:"Supernova",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership",prometheus:"Prometheus"};
   const campaignComboNames = {individual:"Combo Solo",casal:"Dupla Cósmica",tripulacao:"Tripulação",familia:"Família Galáctica"};
   const campaignMoney = n => Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
   function campaignIsLive(c, now=new Date()){
