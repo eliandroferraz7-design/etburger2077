@@ -1703,6 +1703,7 @@
       { id: "parallax", name: "PARALLAX", price: 36.00, desc: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, ovo, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
       { id: "mothership", name: "MOTHERSHIP", price: 40.00, desc: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, calabresa fatiada, ovo, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
       { id: "supernova2", name: "SUPERNOVA", price: 42.00, desc: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, bacon crocante, ovo, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND" },
+      { id: "cyberpunk2077", name: "CYBERPUNK 2077", price: 46.00, desc: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, calabresa fatiada, bacon crocante, ovo, alface, tomate, maionese e cebola caramelizada", badge: "2X BLEND", tag: "Acesso total, em dobro" },
       { id: "sputnik", name: "SPUTNIK", price: 42.00, desc: "Pão de brioche, 3x blend 120g, mussarela em triplo, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND", premium: true, tag: "O Premium da Casa" },
       { id: "prometheus", name: "PROMETHEUS", price: 48.00, desc: "Pão de brioche, 3x blend 120g, mussarela em triplo, presunto, calabresa fatiada, ovo, alface, tomate, maionese e cebola caramelizada", badge: "3X BLEND", seal: "🧬 ORIGEM DESCONHECIDA", stamp: "ULTRASSECRETO", tag: "O mais completo da galáxia" }
     ],
@@ -2765,6 +2766,7 @@
     const burgerCodes = {
       orbit: "CB",         // Cheeseburger tradicional
       cyberpunk: "XT",     // X-Tudo
+      cyberpunk2077: "XTD", // X-Tudo Duplo
       roswell: "XB",       // X-Burger
       area51: "XS",        // X-Salada
       hangar18: "XC",      // X-Calabresa
@@ -2777,7 +2779,7 @@
       prometheus: "XCT"    // X-Calabresa Triplo
     };
     const burgerNames = {
-      orbit: "Orbit", cyberpunk: "Cyberpunk", roswell: "Roswell", area51: "Área 51", hangar18: "Hangar 18",
+      orbit: "Orbit", cyberpunk: "Cyberpunk", cyberpunk2077: "Cyberpunk 2077", roswell: "Roswell", area51: "Área 51", hangar18: "Hangar 18",
       voyager: "Voyager", darkside: "Darkside", parallax: "Parallax", sputnik: "Sputnik", mothership: "Mothership", supernova2: "Supernova", prometheus: "Prometheus"
     };
     function orderItemLabel(item){

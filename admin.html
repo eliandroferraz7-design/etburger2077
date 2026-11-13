@@ -590,6 +590,7 @@ details.fold[open]>summary::after{content:"−"}
         <option value="sputnik">Sputnik (XBT) — X-Burger Triplo</option>
         <option value="mothership">Mothership (XCD) — X-Calabresa Duplo</option>
         <option value="supernova2">Supernova (XBAD) — X-Bacon Duplo</option>
+        <option value="cyberpunk2077">Cyberpunk 2077 (XTD) — X-Tudo Duplo</option>
         <option value="prometheus">Prometheus (XCT) — X-Calabresa Triplo</option>
       </select>
     </section>
@@ -600,7 +601,7 @@ details.fold[open]>summary::after{content:"−"}
       <div class="cost-form">
         <div><label for="campaignName">Nome da campanha</label><input id="campaignName" maxlength="80" placeholder="Ex.: Sextou ET"></div>
         <div><label for="campaignType">Tipo</label><select id="campaignType"><option value="burger">Hambúrguer avulso</option><option value="combo">Combo</option></select></div>
-        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="orbit">Orbit</option><option value="cyberpunk">Cyberpunk</option><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option><option value="supernova2">Supernova</option><option value="prometheus">Prometheus</option></select></div>
+        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="orbit">Orbit</option><option value="cyberpunk">Cyberpunk</option><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option><option value="supernova2">Supernova</option><option value="cyberpunk2077">Cyberpunk 2077</option><option value="prometheus">Prometheus</option></select></div>
         <div><label for="campaignDiscountType">Desconto</label><select id="campaignDiscountType"><option value="percentual">Percentual (%)</option><option value="preco">Preço promocional (R$)</option></select></div>
         <div><label for="campaignValue">Valor</label><input id="campaignValue" type="number" min="0.01" step="0.01" value="10"></div>
         <div><label for="campaignBasePrice">Preço normal (R$)</label><input id="campaignBasePrice" type="number" min="0.01" step="0.01" placeholder="Ex.: 20,00"></div>
@@ -970,6 +971,7 @@ details.fold[open]>summary::after{content:"−"}
     parallax: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, ovo, alface, tomate, maionese e cebola caramelizada",
     supernova2: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, bacon crocante, ovo, alface, tomate, maionese e cebola caramelizada",
     mothership: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, calabresa fatiada, ovo, alface, tomate, maionese e cebola caramelizada",
+    cyberpunk2077: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, calabresa fatiada, bacon crocante, ovo, alface, tomate, maionese e cebola caramelizada",
     sputnik: "Pão de brioche, 3x blend 120g, mussarela em triplo, alface, tomate, maionese e cebola caramelizada",
     prometheus: "Pão de brioche, 3x blend 120g, mussarela em triplo, presunto, calabresa fatiada, ovo, alface, tomate, maionese e cebola caramelizada"
   };
@@ -1022,7 +1024,7 @@ details.fold[open]>summary::after{content:"−"}
 
   // ======= ESTOQUE (agrupado) =======
   // Burgers na mesma ordem e seções do site: clássicos (0), duplos (1), triplos (2). Fora da lista = não é burger (-1).
-  const BURGER_TIER_FIXED = { orbit:0, roswell:0, area51:0, hangar18:0, voyager:0, cyberpunk:0, darkside:1, parallax:1, mothership:1, supernova2:1, sputnik:2, prometheus:2 };
+  const BURGER_TIER_FIXED = { orbit:0, roswell:0, area51:0, hangar18:0, voyager:0, cyberpunk:0, darkside:1, parallax:1, mothership:1, supernova2:1, cyberpunk2077:1, sputnik:2, prometheus:2 };
   function burgerTier(id){
     id = String(id);
     if (Object.prototype.hasOwnProperty.call(BURGER_TIER_FIXED, id)) return BURGER_TIER_FIXED[id];
@@ -1481,8 +1483,8 @@ on conflict (code) do nothing;
   //   manual       = { combo:{...}, burger:{...} }
   const DAYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const COMBO_LIST = [["individual","Combo Solo"],["casal","Dupla Cósmica"],["tripulacao","Tripulação"],["familia","Família Galáctica"]];
-  const CLASSIC_BURGERS = [["orbit","Orbit"],["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["cyberpunk","Cyberpunk"],["darkside","Darkside"],["parallax","Parallax"],["mothership","Mothership"],["supernova2","Supernova"],["sputnik","Sputnik"],["prometheus","Prometheus"]];
-  const BURGER_DEFAULT_PRICE = { orbit:16, cyberpunk:34, roswell:20, area51:24, hangar18:28, voyager:30, darkside:32, parallax:36, sputnik:42, mothership:40, supernova2:42, prometheus:48 };
+  const CLASSIC_BURGERS = [["orbit","Orbit"],["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["cyberpunk","Cyberpunk"],["darkside","Darkside"],["parallax","Parallax"],["mothership","Mothership"],["supernova2","Supernova"],["cyberpunk2077","Cyberpunk 2077"],["sputnik","Sputnik"],["prometheus","Prometheus"]];
+  const BURGER_DEFAULT_PRICE = { orbit:16, cyberpunk:34, roswell:20, area51:24, hangar18:28, voyager:30, darkside:32, parallax:36, sputnik:42, mothership:40, supernova2:42, cyberpunk2077:46, prometheus:48 };
   const LINE_KEY = "line:classica";
   const COMBO_LABEL = Object.fromEntries(COMBO_LIST);
   const BURGER_LABEL = Object.fromEntries(CLASSIC_BURGERS);
@@ -1977,6 +1979,7 @@ on conflict (code) do nothing;
       if(n.includes("tripulacao")) return "combo_tripulacao";
       if(n.includes("familia galactica") || n.includes("combo familia")) return "combo_familia";
       if(n.includes("orbit")) return "orbit";
+      if(n.includes("cyberpunk 2077") || n.includes("cyberpunk2077")) return "cyberpunk2077";
       if(n.includes("cyberpunk")) return "cyberpunk";
       if(n.includes("roswell")) return "roswell";
       if(n.includes("area 51") || n.includes("area51")) return "area51";
@@ -2300,7 +2303,7 @@ on conflict (code) do nothing;
   // Campanhas independentes: guardadas na mesma tabela settings, chave promo_campaigns.
   let promoCampaigns = [];
   let editingCampaignId = null;
-  const campaignBurgerNames = {orbit:"Orbit",cyberpunk:"Cyberpunk",roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership",supernova2:"Supernova",prometheus:"Prometheus"};
+  const campaignBurgerNames = {orbit:"Orbit",cyberpunk:"Cyberpunk",roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership",supernova2:"Supernova",cyberpunk2077:"Cyberpunk 2077",prometheus:"Prometheus"};
   const campaignComboNames = {individual:"Combo Solo",casal:"Dupla Cósmica",tripulacao:"Tripulação",familia:"Família Galáctica"};
   const campaignMoney = n => Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
   function campaignIsLive(c, now=new Date()){
