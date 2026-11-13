@@ -585,11 +585,11 @@ details.fold[open]>summary::after{content:"−"}
         <option value="area51">Área 51 (XS) — X-Salada</option>
         <option value="hangar18">Hangar 18 (XC) — X-Calabresa</option>
         <option value="voyager">Voyager (XBA) — X-Bacon</option>
-        <option value="supernova">Supernova (XCB) — X-Calabacon</option>
         <option value="darkside">Darkside (XBD) — X-Burger Duplo</option>
         <option value="parallax">Parallax (XSD) — X-Salada Duplo</option>
         <option value="sputnik">Sputnik (XBT) — X-Burger Triplo</option>
         <option value="mothership">Mothership (XCD) — X-Calabresa Duplo</option>
+        <option value="supernova2">Supernova (XBAD) — X-Bacon Duplo</option>
         <option value="prometheus">Prometheus (XCT) — X-Calabresa Triplo</option>
       </select>
     </section>
@@ -600,7 +600,7 @@ details.fold[open]>summary::after{content:"−"}
       <div class="cost-form">
         <div><label for="campaignName">Nome da campanha</label><input id="campaignName" maxlength="80" placeholder="Ex.: Sextou ET"></div>
         <div><label for="campaignType">Tipo</label><select id="campaignType"><option value="burger">Hambúrguer avulso</option><option value="combo">Combo</option></select></div>
-        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="orbit">Orbit</option><option value="cyberpunk">Cyberpunk</option><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="supernova">Supernova</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option><option value="prometheus">Prometheus</option></select></div>
+        <div class="wide"><label for="campaignTarget">Produto</label><select id="campaignTarget"><option value="orbit">Orbit</option><option value="cyberpunk">Cyberpunk</option><option value="roswell">Roswell</option><option value="area51">Área 51</option><option value="hangar18">Hangar 18</option><option value="voyager">Voyager</option><option value="darkside">Darkside</option><option value="parallax">Parallax</option><option value="sputnik">Sputnik</option><option value="mothership">Mothership</option><option value="supernova2">Supernova</option><option value="prometheus">Prometheus</option></select></div>
         <div><label for="campaignDiscountType">Desconto</label><select id="campaignDiscountType"><option value="percentual">Percentual (%)</option><option value="preco">Preço promocional (R$)</option></select></div>
         <div><label for="campaignValue">Valor</label><input id="campaignValue" type="number" min="0.01" step="0.01" value="10"></div>
         <div><label for="campaignBasePrice">Preço normal (R$)</label><input id="campaignBasePrice" type="number" min="0.01" step="0.01" placeholder="Ex.: 20,00"></div>
@@ -960,18 +960,18 @@ details.fold[open]>summary::after{content:"−"}
   // Burgers fixos guardam o texto editado em settings.custom_menu.value.descs; os cadastrados pelo painel guardam na própria descrição.
   let menuDescs = {};
   const BURGER_DEFAULT_DESC = {
-    orbit: "Pão de brioche, blend 120g, queijo e cebola caramelizada",
-    cyberpunk: "Pão de brioche, blend 120g, mussarela, ovo, bacon, presunto, calabresa, alface, tomate, maionese e cebola caramelizada",
+    orbit: "Pão de brioche, blend 120g, mussarela e cebola caramelizada",
+    cyberpunk: "Pão de brioche, blend 120g, mussarela, presunto, calabresa fatiada, bacon crocante, ovo, alface, tomate, maionese e cebola caramelizada",
     roswell: "Pão de brioche, blend 120g, mussarela, presunto, alface, tomate, maionese e cebola caramelizada",
-    area51: "Pão de brioche, blend 120g, mussarela, ovo, presunto, alface, tomate, maionese e cebola caramelizada",
-    hangar18: "Pão de brioche, blend 120g, calabresa fatiada, mussarela, ovo, presunto, alface, tomate, maionese e cebola caramelizada",
-    voyager: "Pão de brioche, blend 120g, mussarela, ovo, bacon crocante, presunto, alface, tomate, maionese e cebola caramelizada",
-    supernova: "Pão de brioche, blend 120g, mussarela, ovo, presunto, bacon, calabresa, alface, tomate, maionese e cebola caramelizada",
+    area51: "Pão de brioche, blend 120g, mussarela, presunto, ovo, alface, tomate, maionese e cebola caramelizada",
+    hangar18: "Pão de brioche, blend 120g, mussarela, presunto, calabresa fatiada, ovo, alface, tomate, maionese e cebola caramelizada",
+    voyager: "Pão de brioche, blend 120g, mussarela, presunto, bacon crocante, ovo, alface, tomate, maionese e cebola caramelizada",
     darkside: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, alface, tomate, maionese e cebola caramelizada",
-    parallax: "Pão de brioche, 2x blend 120g, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada",
-    mothership: "Pão de brioche, 2x blend 120g, calabresa fatiada, mussarela em dobro, ovo, presunto, alface, tomate, maionese e cebola caramelizada",
+    parallax: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, ovo, alface, tomate, maionese e cebola caramelizada",
+    supernova2: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, bacon crocante, ovo, alface, tomate, maionese e cebola caramelizada",
+    mothership: "Pão de brioche, 2x blend 120g, mussarela em dobro, presunto, calabresa fatiada, ovo, alface, tomate, maionese e cebola caramelizada",
     sputnik: "Pão de brioche, 3x blend 120g, mussarela em triplo, alface, tomate, maionese e cebola caramelizada",
-    prometheus: "Pão de brioche, 3x blend 120g, calabresa fatiada, mussarela em triplo, ovo, presunto, alface, tomate, maionese e cebola caramelizada"
+    prometheus: "Pão de brioche, 3x blend 120g, mussarela em triplo, presunto, calabresa fatiada, ovo, alface, tomate, maionese e cebola caramelizada"
   };
   function ingMsg(t, bad){ const m = nbEl("ingMsg"); m.textContent = t; m.style.color = bad ? "#F28B82" : ""; }
   function ingCurrentDesc(id){
@@ -1027,7 +1027,7 @@ details.fold[open]>summary::after{content:"−"}
       note:"Combo desligado some do site." },
     { key:"fritas",  title:"🍟 Fritas",                    match: id => id.startsWith("fritas_"),
       note:"Fritas desligadas também saem dos combos (o preço do combo é recalculado)." },
-    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["orbit","cyberpunk","roswell","area51","hangar18","voyager","supernova","darkside","parallax","sputnik","mothership","prometheus"].includes(id) || customBurgerIds.has(id) },
+    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["orbit","cyberpunk","roswell","area51","hangar18","voyager","darkside","parallax","sputnik","mothership","supernova2","prometheus"].includes(id) || customBurgerIds.has(id) },
     { key:"bebidas", title:"🥤 Bebidas",                   match: id => id.startsWith("refri") },
     { key:"outros",  title:"📦 Outros",                    match: () => true }
   ];
@@ -1457,8 +1457,8 @@ on conflict (code) do nothing;
   //   manual       = { combo:{...}, burger:{...} }
   const DAYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const COMBO_LIST = [["individual","Combo Solo"],["casal","Dupla Cósmica"],["tripulacao","Tripulação"],["familia","Família Galáctica"]];
-  const CLASSIC_BURGERS = [["orbit","Orbit"],["cyberpunk","Cyberpunk"],["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["supernova","Supernova"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"],["prometheus","Prometheus"]];
-  const BURGER_DEFAULT_PRICE = { orbit:16, cyberpunk:34, roswell:20, area51:24, hangar18:28, voyager:30, supernova:30, darkside:32, parallax:36, sputnik:42, mothership:40, prometheus:48 };
+  const CLASSIC_BURGERS = [["orbit","Orbit"],["cyberpunk","Cyberpunk"],["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"],["supernova2","Supernova"],["prometheus","Prometheus"]];
+  const BURGER_DEFAULT_PRICE = { orbit:16, cyberpunk:34, roswell:20, area51:24, hangar18:28, voyager:30, darkside:32, parallax:36, sputnik:42, mothership:40, supernova2:42, prometheus:48 };
   const LINE_KEY = "line:classica";
   const COMBO_LABEL = Object.fromEntries(COMBO_LIST);
   const BURGER_LABEL = Object.fromEntries(CLASSIC_BURGERS);
@@ -1958,11 +1958,11 @@ on conflict (code) do nothing;
       if(n.includes("area 51") || n.includes("area51")) return "area51";
       if(n.includes("hangar 18") || n.includes("hangar18")) return "hangar18";
       if(n.includes("cosmos") || n.includes("voyager")) return "voyager";
-      if(n.includes("supernova")) return "supernova";
       if(n.includes("darkside")) return "darkside";
       if(n.includes("parallax")) return "parallax";
       if(n.includes("sputnik")) return "sputnik";
       if(n.includes("mothership")) return "mothership";
+      if(n.includes("supernova")) return "supernova2";
       if(n.includes("prometheus")) return "prometheus";
       const cb = customBurgers.find(b => n.includes(norm(b.name)));
       if(cb) return cb.id;
@@ -2276,7 +2276,7 @@ on conflict (code) do nothing;
   // Campanhas independentes: guardadas na mesma tabela settings, chave promo_campaigns.
   let promoCampaigns = [];
   let editingCampaignId = null;
-  const campaignBurgerNames = {orbit:"Orbit",cyberpunk:"Cyberpunk",roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",supernova:"Supernova",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership",prometheus:"Prometheus"};
+  const campaignBurgerNames = {orbit:"Orbit",cyberpunk:"Cyberpunk",roswell:"Roswell","area51":"Área 51",hangar18:"Hangar 18",voyager:"Voyager",darkside:"Darkside",parallax:"Parallax",sputnik:"Sputnik",mothership:"Mothership",supernova2:"Supernova",prometheus:"Prometheus"};
   const campaignComboNames = {individual:"Combo Solo",casal:"Dupla Cósmica",tripulacao:"Tripulação",familia:"Família Galáctica"};
   const campaignMoney = n => Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
   function campaignIsLive(c, now=new Date()){
