@@ -1021,13 +1021,31 @@ details.fold[open]>summary::after{content:"−"}
   });
 
   // ======= ESTOQUE (agrupado) =======
+  // Burgers na mesma ordem e seções do site: clássicos (0), duplos (1), triplos (2). Fora da lista = não é burger (-1).
+  const BURGER_TIER_FIXED = { orbit:0, roswell:0, area51:0, hangar18:0, voyager:0, cyberpunk:0, darkside:1, parallax:1, mothership:1, supernova2:1, sputnik:2, prometheus:2 };
+  function burgerTier(id){
+    id = String(id);
+    if (Object.prototype.hasOwnProperty.call(BURGER_TIER_FIXED, id)) return BURGER_TIER_FIXED[id];
+    const cb = customBurgers.find(b => b.id === id);
+    if (!cb) return -1;
+    return /^3X/i.test(cb.badge || "") ? 2 : /^2X/i.test(cb.badge || "") ? 1 : 0;
+  }
+  function burgerSortPrice(r){
+    const p = r.price != null ? Number(r.price) : NaN;
+    if (Number.isFinite(p) && p > 0) return p;
+    const cb = customBurgers.find(b => b.id === r.item_id);
+    return cb ? cb.price : (BURGER_DEFAULT_PRICE[r.item_id] || 0);
+  }
   // Ordem dos cards no painel. "match" decide em qual grupo cada item_id entra.
   const GROUPS = [
     { key:"combos",  title:"🧩 Combos",                    match: id => id.startsWith("combo_"),
       note:"Combo desligado some do site." },
     { key:"fritas",  title:"🍟 Fritas",                    match: id => id.startsWith("fritas_"),
       note:"Fritas desligadas também saem dos combos (o preço do combo é recalculado)." },
-    { key:"classica",title:"🍔 Burgers clássicos", match: id => ["orbit","cyberpunk","roswell","area51","hangar18","voyager","darkside","parallax","sputnik","mothership","supernova2","prometheus"].includes(id) || customBurgerIds.has(id) },
+    { key:"classica",title:"🍔 Burgers clássicos", match: id => burgerTier(id) === 0,
+      note:"1x blend 120g · igual à seção “Clássicos” do site." },
+    { key:"duplos",  title:"🍔 Burgers duplos (2X BLEND)", match: id => burgerTier(id) === 1 },
+    { key:"triplos", title:"🍔 Burgers triplos (3X BLEND)", match: id => burgerTier(id) === 2 },
     { key:"bebidas", title:"🥤 Bebidas",                   match: id => id.startsWith("refri") },
     { key:"outros",  title:"📦 Outros",                    match: () => true }
   ];
@@ -1055,9 +1073,14 @@ details.fold[open]>summary::after{content:"−"}
     if (error){ wrap.innerHTML = "Erro ao carregar estoque. Confira a chave do Supabase."; return; }
     // Itens Smash antigos ficam preservados no Supabase, mas não aparecem mais no painel.
     stockRows = (data || []).filter(r => !String(r.item_id || "").endsWith("_s"));
+    // id antigo "supernova" não é usado pelo site (o certo é supernova2): some do painel
+    stockRows = stockRows.filter(r => !/^supernova(?!2$)/.test(String(r.item_id || "")));
     stockRows.forEach(r => { if (r.item_id === "voyager") r.name = "VOYAGER"; });   // nome de exibição do item voyager
     COMBO_ROWS.forEach(c => {
       if (!stockRows.some(r => r.item_id === c.item_id)) stockRows.push({ item_id:c.item_id, name:c.name, available:true, _virtual:true });
+    });
+    CLASSIC_BURGERS.forEach(([id, label]) => {
+      if (!stockRows.some(r => r.item_id === id)) stockRows.push({ item_id:id, name:label.toUpperCase(), available:true, _virtual:true });
     });
     stockRows.sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), "pt-BR"));
     renderStock();
@@ -1069,6 +1092,7 @@ details.fold[open]>summary::after{content:"−"}
     GROUPS.forEach(g => {
       const items = stockRows.filter(r => groupKeyOf(r.item_id) === g.key);
       if (items.length === 0) return;
+      if (["classica","duplos","triplos"].includes(g.key)) items.sort((a,b) => burgerSortPrice(a) - burgerSortPrice(b) || String(a.name||"").localeCompare(String(b.name||""), "pt-BR"));
 
       const card = document.createElement("div");
       card.className = "group-card";
@@ -1155,17 +1179,17 @@ details.fold[open]>summary::after{content:"−"}
     const missing = ids.filter(id => !updated.has(id));
     if (!missing.length) return true;
 
-    const creatable = missing.filter(id => COMBO_NAMES[id]);
+    const creatable = missing.filter(id => COMBO_NAMES[id] || BURGER_LABEL[id]);
     if (creatable.length){
       const { error: e2 } = await supabaseClient.from("stock")
-        .insert(creatable.map(id => ({ item_id:id, name:COMBO_NAMES[id], available })));
+        .insert(creatable.map(id => ({ item_id:id, name:COMBO_NAMES[id] || String(BURGER_LABEL[id]).toUpperCase(), available })));
       if (e2){
         alert("Não consegui criar os combos na tabela stock. Abra a aba Promoções e rode o SQL de instalação (uma vez só).");
         document.getElementById("sqlBox").open = true;
         return false;
       }
     }
-    const rest = missing.filter(id => !COMBO_NAMES[id]);
+    const rest = missing.filter(id => !COMBO_NAMES[id] && !BURGER_LABEL[id]);
     if (rest.length){
       alert(`Atenção: ${rest.length} item(ns) não existem na tabela stock e não foram atualizados. Recarregue a página e confira.`);
       if (rest.length === ids.length) return false;
@@ -1457,7 +1481,7 @@ on conflict (code) do nothing;
   //   manual       = { combo:{...}, burger:{...} }
   const DAYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const COMBO_LIST = [["individual","Combo Solo"],["casal","Dupla Cósmica"],["tripulacao","Tripulação"],["familia","Família Galáctica"]];
-  const CLASSIC_BURGERS = [["orbit","Orbit"],["cyberpunk","Cyberpunk"],["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["darkside","Darkside"],["parallax","Parallax"],["sputnik","Sputnik"],["mothership","Mothership"],["supernova2","Supernova"],["prometheus","Prometheus"]];
+  const CLASSIC_BURGERS = [["orbit","Orbit"],["roswell","Roswell"],["area51","Área 51"],["hangar18","Hangar 18"],["voyager","Voyager"],["cyberpunk","Cyberpunk"],["darkside","Darkside"],["parallax","Parallax"],["mothership","Mothership"],["supernova2","Supernova"],["sputnik","Sputnik"],["prometheus","Prometheus"]];
   const BURGER_DEFAULT_PRICE = { orbit:16, cyberpunk:34, roswell:20, area51:24, hangar18:28, voyager:30, darkside:32, parallax:36, sputnik:42, mothership:40, supernova2:42, prometheus:48 };
   const LINE_KEY = "line:classica";
   const COMBO_LABEL = Object.fromEntries(COMBO_LIST);
