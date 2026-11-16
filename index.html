@@ -1547,7 +1547,6 @@
         <option value="">Selecione...</option>
         <option value="pix">💠 Pix</option>
         <option value="dinheiro">💵 Dinheiro</option>
-        <option value="cartao">💳 Cartão</option>
       </select>
     </div>
     <div class="field" id="pixPaymentBox" style="display:none; background:#e5efe7; border:2px solid var(--teal); border-radius:10px; padding:12px;">
@@ -2634,7 +2633,7 @@
     try { await navigator.clipboard.writeText("55419569272"); msg.textContent = "✅ Chave Pix copiada!"; }
     catch(e) { msg.textContent = "Não foi possível copiar automaticamente. Copie: 55419569272"; }
   };
-  const PAYMENT_LABELS = { pix: "Pix", dinheiro: "Dinheiro", cartao: "Cartão" };
+  const PAYMENT_LABELS = { pix: "Pix", dinheiro: "Dinheiro" };
 
   function paymentSummary(total){
     const method = paymentSel.value;
