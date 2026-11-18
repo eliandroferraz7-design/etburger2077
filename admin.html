@@ -211,6 +211,19 @@ label{cursor:pointer}
 .chart-value{font-size:14px;font-weight:700;color:#ffd978;text-align:right;white-space:nowrap}
 .chart-foot{margin-top:12px}
 
+/* ---------- lucro e margem por lanche ---------- */
+.pm-sum{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0}
+@media(min-width:640px){.pm-sum{grid-template-columns:repeat(3,1fr)}}
+.tbl .pm-cost{width:88px;min-height:36px;padding:4px 8px;text-align:right;font-size:13px}
+.pm-m{display:inline-block;padding:2px 9px;border-radius:20px;font:700 12px 'Poppins',sans-serif}
+.pm-m.hi{background:#17382a;color:#a9e9b8}
+.pm-m.mid{background:#4a3a14;color:#ffd978}
+.pm-m.lo{background:#4a251d;color:#ffc0ad}
+.pm-tag{font-size:12px;font-weight:600;white-space:nowrap}
+.pm-miss td{opacity:.8}
+.pm-msg{min-height:18px;margin-top:8px;font-size:13px;color:var(--green)}
+.pm-msg.err{color:var(--danger)}
+
 /* ---------- metas, comparativos e gráfico do mês ---------- */
 .goals-card,.month-card{margin-bottom:14px}
 .gl-meta{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px}
@@ -226,7 +239,7 @@ label{cursor:pointer}
 .gl-sub{font-size:12px;color:var(--muted)}
 .gl-sub b{color:var(--text)}
 .gl-cmp{display:grid;grid-template-columns:1fr;gap:10px}
-@media(min-width:640px){.gl-cmp{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:640px){.gl-cmp{grid-template-columns:repeat(2,1fr)}}
 .gl-box{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);min-width:0}
 .gl-box .k{font:700 11px 'Poppins',sans-serif;color:var(--muted);letter-spacing:.03em}
 .gl-box .v{margin-top:4px;font:700 22px/1.2 'Poppins',sans-serif;color:var(--text);overflow-wrap:anywhere}
@@ -792,6 +805,13 @@ details.fold[open]>summary::after{content:"−"}
     </section>
     </details>
     <details class="fold" open><summary>🏆 Mais vendidos do período</summary><div id="rankingBox"></div></details>
+    <details class="fold" open id="foldMargin"><summary>💰 Lucro e margem por lanche</summary>
+      <div class="admin-box" style="margin-top:10px">
+        <div class="hint">Segue o período escolhido lá em cima (Hoje, Semana, Mês…). Digite o <b>custo de produção</b> de cada lanche (insumos + embalagem) na coluna <b>Custo</b>; ele fica salvo.</div>
+        <div id="marginBox"><div class="chart-empty">Aguardando pedidos do período…</div></div>
+        <div class="pm-msg" id="pmMsg" aria-live="polite"></div>
+      </div>
+    </details>
     <details class="fold" id="foldMonthly"><summary>🗓️ Histórico por mês</summary><div id="monthlyBox"><div class="empty-msg">Abra para carregar.</div></div></details>
     <details class="fold" open><summary>🧾 Pedidos</summary>
     <div id="ordersList"></div>
@@ -2275,7 +2295,7 @@ on conflict (code) do nothing;
     renderExtraStats(data, total);
     renderKpis(data, period);
     loadGoals();
-    lastOrders = data; lastRange = [startDate, endDate]; renderRanking(data); loadYear(period === "day" ? false : true);
+    lastOrders = data; lastRange = [startDate, endDate]; renderRanking(data); renderMargins(data); loadYear(period === "day" ? false : true);
 
 
     if (data.length === 0){
@@ -2725,6 +2745,127 @@ on conflict (code) do nothing;
   document.querySelector('[data-tab="cupons"]').addEventListener("click", loadCoupons);
   cpUpdateTypeUI();
 
+  // ======= LUCRO E MARGEM POR LANCHE =======
+  let pmCosts = {}, pmRecipe = {}, pmLoaded = false, pmOrders = [];
+  const pmNorm = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  // mesma regra de nomes usada na ficha técnica (product_key)
+  function pmKey(name){
+    const n = pmNorm(name);
+    if (n.includes("combo solo") || n.includes("combo individual")) return "combo_individual";
+    if (n.includes("dupla cosmica") || n.includes("combo casal")) return "combo_casal";
+    if (n.includes("tripulacao")) return "combo_tripulacao";
+    if (n.includes("familia galactica") || n.includes("combo familia")) return "combo_familia";
+    if (n.includes("orbit")) return "orbit";
+    if (n.includes("cyberpunk 2077") || n.includes("cyberpunk2077")) return "cyberpunk2077";
+    if (n.includes("cyberpunk")) return "cyberpunk";
+    if (n.includes("roswell")) return "roswell";
+    if (n.includes("area 51") || n.includes("area51")) return "area51";
+    if (n.includes("hangar 18") || n.includes("hangar18")) return "hangar18";
+    if (n.includes("cosmos") || n.includes("voyager")) return "voyager";
+    if (n.includes("darkside")) return "darkside";
+    if (n.includes("parallax")) return "parallax";
+    if (n.includes("sputnik")) return "sputnik";
+    if (n.includes("mothership")) return "mothership";
+    if (n.includes("supernova")) return "supernova2";
+    if (n.includes("prometheus")) return "prometheus";
+    const cb = customBurgers.find(b => n.includes(pmNorm(b.name)));
+    if (cb) return cb.id;
+    if (n.includes("fritas") || n.includes("batata")) return "fritas";
+    return null;
+  }
+  async function pmLoad(){
+    if (pmLoaded) return;
+    try{
+      const { data } = await supabaseClient.from("settings").select("value").eq("key", "item_costs").maybeSingle();
+      if (data && data.value && typeof data.value === "object") pmCosts = data.value;
+    } catch(e){}
+    try{ // ficha técnica, se existir no Supabase
+      const { data, error } = await supabaseClient.from("cost_recipe_items").select("product_key,quantity,cost_ingredients(id,purchase_cost,purchase_qty)");
+      if (!error && Array.isArray(data)){
+        data.forEach(r => {
+          const ing = r.cost_ingredients; if (!ing || !ing.id) return;
+          const u = Number(ing.purchase_cost || 0) / Math.max(Number(ing.purchase_qty || 0), 0.0001);
+          pmRecipe[r.product_key] = (pmRecipe[r.product_key] || 0) + Number(r.quantity || 0) * u;
+        });
+      }
+    } catch(e){}
+    pmLoaded = true;
+  }
+  function pmCostOf(label){
+    const nk = pmNorm(label);
+    if (Object.prototype.hasOwnProperty.call(pmCosts, nk) && Number(pmCosts[nk]) >= 0 && pmCosts[nk] !== "" && pmCosts[nk] !== null) return { c: Number(pmCosts[nk]), src: "manual" };
+    const k = pmKey(label);
+    if (k && Object.prototype.hasOwnProperty.call(pmRecipe, k) && pmRecipe[k] > 0) return { c: pmRecipe[k], src: "ficha" };
+    return null;
+  }
+  async function renderMargins(orders){
+    pmOrders = orders || [];
+    const box = document.getElementById("marginBox"); if (!box) return;
+    await pmLoad();
+    const by = {};
+    pmOrders.forEach(o => (Array.isArray(o.items) ? o.items : []).forEach(i => {
+      const q = Math.max(0, Number(i.qty) || 0); if (!q) return;
+      const k = itemLabel(String(i.name || "Item")).replace(/\s*\((?:PROMO|Promo|promo)[^)]*\)\s*$/, "").trim() || "Item";
+      const r = by[k] || (by[k] = { q: 0, v: 0 }); r.q += q; r.v += q * Number(i.price || 0);
+    }));
+    const rows = Object.entries(by).map(([k, r]) => {
+      const cc = pmCostOf(k), price = r.v / r.q;
+      const row = { k, q: r.q, v: r.v, price, cost: cc ? cc.c : null, src: cc ? cc.src : null };
+      if (cc){ row.unit = price - cc.c; row.margin = price > 0 ? row.unit / price * 100 : 0; row.profit = r.v - r.q * cc.c; }
+      return row;
+    });
+    if (!rows.length){ box.innerHTML = '<div class="chart-empty">Sem vendas neste período.</div>'; return; }
+    const withC = rows.filter(r => r.cost !== null), noC = rows.filter(r => r.cost === null);
+    const totProfit = withC.reduce((a, r) => a + r.profit, 0), totRev = withC.reduce((a, r) => a + r.v, 0), totQ = withC.reduce((a, r) => a + r.q, 0);
+    const allRev = rows.reduce((a, r) => a + r.v, 0) || 1, noRev = noC.reduce((a, r) => a + r.v, 0);
+    // classificação (engenharia de cardápio): popularidade × lucro por unidade
+    const n = withC.length, popMin = n ? 0.7 * totQ / n : 0, unitAvg = totQ ? totProfit / totQ : 0;
+    const tag = r => {
+      if (n < 3 || r.cost === null) return "";
+      const pop = r.q >= popMin, rich = r.unit >= unitAvg;
+      return pop && rich ? '<span class="pm-tag" style="color:var(--green)">⭐ Campeão</span>'
+        : pop ? '<span class="pm-tag" style="color:var(--accent)">🐴 Vende muito, lucra pouco</span>'
+        : rich ? '<span class="pm-tag" style="color:var(--info)">🧩 Lucra bem, divulgue</span>'
+        : '<span class="pm-tag" style="color:var(--danger)">🔻 Rever ou tirar</span>';
+    };
+    withC.sort((a, b) => b.profit - a.profit);
+    noC.sort((a, b) => b.q - a.q);
+    const mcls = m => m >= 60 ? "hi" : m >= 40 ? "mid" : "lo";
+    const line = r => {
+      const val = r.cost !== null ? String(r.cost.toFixed(2)).replace(".", ",") : "";
+      const inp = '<input class="pm-cost" type="text" inputmode="decimal" data-k="' + esc(pmNorm(r.k)) + '" data-label="' + esc(r.k) + '" value="' + val + '" placeholder="R$" aria-label="Custo de ' + esc(r.k) + '">' + (r.src === "ficha" ? '<div style="font-size:10px;color:var(--muted)">ficha técnica</div>' : "");
+      if (r.cost === null) return '<tr class="pm-miss"><td>' + esc(r.k) + '</td><td>' + r.q + '</td><td>' + fmt(r.price) + '</td><td>' + inp + '</td><td>—</td><td>—</td><td>—</td><td><span class="pm-tag" style="color:var(--muted)">informe o custo</span></td></tr>';
+      return '<tr><td>' + esc(r.k) + '</td><td>' + r.q + '</td><td>' + fmt(r.price) + '</td><td>' + inp + '</td><td>' + fmt(r.unit) + '</td><td><span class="pm-m ' + mcls(r.margin) + '">' + r.margin.toFixed(0) + '%</span></td><td><b>' + fmt(r.profit) + '</b></td><td>' + tag(r) + '</td></tr>';
+    };
+    const sum = '<div class="pm-sum">' +
+      '<div class="gl-box"><div class="k">LUCRO BRUTO ESTIMADO</div><div class="v">' + (n ? fmt(totProfit) : "—") + '</div><div class="s">Preço de venda menos custo, nos lanches com custo informado.</div></div>' +
+      '<div class="gl-box"><div class="k">MARGEM MÉDIA</div><div class="v">' + (n && totRev > 0 ? (totProfit / totRev * 100).toFixed(0) + "%" : "—") + '</div><div class="s">Calculada sobre o que foi vendido, não sobre a média dos preços.</div></div>' +
+      '<div class="gl-box"><div class="k">SEM CUSTO INFORMADO</div><div class="v">' + noC.length + (noC.length === 1 ? " item" : " itens") + '</div><div class="s">' + (noC.length ? (noRev / allRev * 100).toFixed(0) + "% do faturamento dos itens ainda fora do cálculo." : "Todos os itens vendidos entram no cálculo.") + '</div></div></div>';
+    box.innerHTML = sum + '<div class="tbl-wrap"><table class="tbl"><tr><th>ITEM</th><th>QTD</th><th>PREÇO MÉD.</th><th>CUSTO</th><th>LUCRO/UN.</th><th>MARGEM</th><th>LUCRO TOTAL</th><th>LEITURA</th></tr>' +
+      withC.map(line).join("") + noC.map(line).join("") + '</table></div>' +
+      '<small style="display:block;margin-top:8px;color:var(--muted)">Margem = (preço − custo) ÷ preço. Preços antes de cupons e taxa de entrega; não inclui taxa de maquininha nem despesas fixas. ' +
+      (n >= 3 ? "Leitura: ⭐ vende acima do esperado e lucra acima da média; 🐴 vende bem mas deixa pouco por unidade; 🧩 deixa bom lucro mas vende pouco; 🔻 vende pouco e lucra pouco." : "A leitura de campeões aparece quando 3 ou mais itens têm custo informado.") + '</small>';
+    box.querySelectorAll(".pm-cost").forEach(inp => {
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
+      inp.addEventListener("change", async () => {
+        const msg = document.getElementById("pmMsg"), raw = inp.value.trim().replace(",", ".");
+        msg.className = "pm-msg";
+        const next = Object.assign({}, pmCosts);
+        if (raw === "") delete next[inp.dataset.k];
+        else {
+          const v = Number(raw);
+          if (!(v >= 0)){ msg.className = "pm-msg err"; msg.textContent = "Digite um valor válido (ex.: 12,50)."; return; }
+          next[inp.dataset.k] = v;
+        }
+        msg.textContent = "Salvando...";
+        const { error } = await supabaseClient.from("settings").upsert({ key: "item_costs", value: next, updated_at: new Date().toISOString() }, { onConflict: "key" });
+        if (error){ msg.className = "pm-msg err"; msg.textContent = "Não foi possível salvar: " + error.message; return; }
+        pmCosts = next; msg.textContent = "✅ Custo salvo.";
+        renderMargins(pmOrders);
+      });
+    });
+  }
+
   // ======= METAS, COMPARATIVOS E GRÁFICO DO MÊS (Visão geral) =======
   let goalDaily = 0, goalMonthly = 0, goalsLoaded = false, goalBusy = false, goalSel = null, goalState = null;
   const G_OFF = 3 * 3600 * 1000; // Oriximiná = UTC-3
@@ -2803,6 +2944,9 @@ on conflict (code) do nothing;
       const vals = new Array(dim).fill(0), counts = new Array(dim).fill(0);
       let monthSoFar = 0, prevCut = 0, lwSame = 0, lwFull = 0, prevFull = 0;
       const lwStart = todayStart - 7 * 86400000;
+      const dow = new Date(Date.UTC(y, m, d)).getUTCDay(); // semana começa no domingo, igual ao filtro "Semana"
+      const weekStart = todayStart - dow * 86400000, pwStart = weekStart - 7 * 86400000, pwCut = pwStart + (now - weekStart);
+      let weekSoFar = 0, pwSame = 0, pwFull = 0;
       const prevCutMs = Math.min(Date.UTC(py, pm, d) + G_OFF + elapsed, Date.UTC(py, pm + 1, 1) + G_OFF);
       (ord.data || []).forEach(o => {
         const t = new Date(o.created_at).getTime(), v = Number(o.total || 0);
@@ -2813,6 +2957,8 @@ on conflict (code) do nothing;
           prevFull += v;
           if (t < prevCutMs) prevCut += v;
         }
+        if (t >= weekStart) weekSoFar += v;
+        else if (t >= pwStart){ pwFull += v; if (t < pwCut) pwSame += v; }
         if (t >= lwStart && t < lwStart + 86400000){ lwFull += v; if (t < lwStart + elapsed) lwSame += v; }
       });
       const todaySoFar = vals[d - 1];
@@ -2828,6 +2974,8 @@ on conflict (code) do nothing;
       const wdName = G_WD[new Date(Date.UTC(y, m, d)).getUTCDay()];
       const boxHoje = '<div class="gl-box"><div class="k">HOJE × ' + wdName.toUpperCase() + ' PASSADA</div><div class="v">' + fmt(todaySoFar) + '</div>' + gDelta(todaySoFar, lwSame) +
         '<div class="s">Mesmo horário na ' + wdName + ' passada: ' + fmt(lwSame) + ' (dia todo: ' + fmt(lwFull) + ')</div></div>';
+      const boxSem = '<div class="gl-box"><div class="k">SEMANA × SEMANA ANTERIOR</div><div class="v">' + fmt(weekSoFar) + '</div>' + gDelta(weekSoFar, pwSame) +
+        '<div class="s">Semana passada até ' + wdName + ' no mesmo horário: ' + fmt(pwSame) + ' (semana toda: ' + fmt(pwFull) + ')</div></div>';
       const boxMes = '<div class="gl-box"><div class="k">MÊS × MÊS ANTERIOR</div><div class="v">' + fmt(monthSoFar) + '</div>' + gDelta(monthSoFar, prevCut) +
         '<div class="s">' + G_MES[pm] + ' até o dia ' + Math.min(d, pdim) + ': ' + fmt(prevCut) + ' (mês todo: ' + fmt(prevFull) + ')</div></div>';
       let projSub = "Precisa de ao menos 1 dia fechado no mês.";
@@ -2838,7 +2986,7 @@ on conflict (code) do nothing;
       }
       const boxProj = '<div class="gl-box"><div class="k">PROJEÇÃO DO MÊS</div><div class="v">' + (proj === null ? "—" : fmt(proj)) + '</div>' + (proj !== null && prevFull > 0 ? gDelta(proj, prevFull) : "") + '<div class="s">' + projSub + '</div></div>';
 
-      body.innerHTML = '<div class="gl-meta">' + dailyBlock + monthBlock + '</div><div class="gl-cmp">' + boxHoje + boxMes + boxProj + '</div>';
+      body.innerHTML = '<div class="gl-meta">' + dailyBlock + monthBlock + '</div><div class="gl-cmp">' + boxHoje + boxSem + boxMes + boxProj + '</div>';
       goalState = { y, m, d, dim, vals, counts, goalD: goalDaily };
       if (!goalSel || goalSel > dim) goalSel = d;
       gRenderChart();
