@@ -202,14 +202,68 @@ label{cursor:pointer}
 .analytics-head h3{margin:0;font-size:16px}
 .eyebrow{display:block;font-size:11px;font-weight:600;color:var(--muted)}
 .live-dot{padding:4px 9px;border-radius:20px;background:#17382a;border:1px solid #2f6a46;color:#a9e9b8;font-size:10px;font-weight:700;white-space:nowrap}
-.chart-area{min-height:90px}
-.chart-bars{display:flex;flex-direction:column;gap:12px}
-.chart-row{display:grid;grid-template-columns:minmax(70px,1fr) minmax(50px,2fr) auto;align-items:center;gap:10px}
-.chart-label{font-size:13px;font-weight:600;overflow-wrap:anywhere}
-.chart-track{height:12px;border-radius:20px;background:#27434a;overflow:hidden}
+.chart-area{min-height:140px}
+.chart-bars{display:flex;flex-direction:column;gap:16px}
+.chart-row{display:grid;grid-template-columns:minmax(84px,1fr) minmax(90px,3fr) auto;align-items:center;gap:12px}
+.chart-label{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.chart-track{height:24px;border-radius:12px;background:#27434a;overflow:hidden}
 .chart-fill{height:100%;min-width:2px;border-radius:20px;background:linear-gradient(90deg,#2a9d8f,var(--accent))}
-.chart-value{font-size:12px;font-weight:700;color:#ffd978;text-align:right;white-space:nowrap}
+.chart-value{font-size:14px;font-weight:700;color:#ffd978;text-align:right;white-space:nowrap}
 .chart-foot{margin-top:12px}
+
+/* ---------- metas, comparativos e gráfico do mês ---------- */
+.goals-card,.month-card{margin-bottom:14px}
+.gl-meta{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px}
+@media(min-width:640px){.gl-meta{grid-template-columns:1fr 1fr}}
+.gl-goal .gl-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.gl-goal .gl-name{font:700 13px 'Poppins',sans-serif;color:var(--muted)}
+.gl-goal .gl-val{font:700 18px 'Poppins',sans-serif;color:var(--text)}
+.gl-goal .gl-val small{font-size:13px;font-weight:600;color:var(--muted)}
+.gl-track{height:22px;margin:8px 0 6px;border-radius:12px;background:#27434a;overflow:hidden}
+.gl-fill{height:100%;min-width:3px;border-radius:12px;background:var(--orange);transition:width .5s}
+.gl-fill.mid{background:var(--accent)}
+.gl-fill.done{background:var(--green)}
+.gl-sub{font-size:12px;color:var(--muted)}
+.gl-sub b{color:var(--text)}
+.gl-cmp{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:640px){.gl-cmp{grid-template-columns:repeat(3,1fr)}}
+.gl-box{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);min-width:0}
+.gl-box .k{font:700 11px 'Poppins',sans-serif;color:var(--muted);letter-spacing:.03em}
+.gl-box .v{margin-top:4px;font:700 22px/1.2 'Poppins',sans-serif;color:var(--text);overflow-wrap:anywhere}
+.gl-box .s{margin-top:4px;font-size:12px;color:var(--muted)}
+.gd{display:inline-block;margin-top:2px;padding:2px 10px;border-radius:20px;font:700 14px 'Poppins',sans-serif}
+.gd.up{background:#17382a;color:#a9e9b8}
+.gd.down{background:#4a251d;color:#ffc0ad}
+.gd.flat{background:#27434a;color:var(--muted)}
+.goal-set{margin-top:14px}
+.goal-set .goal-form{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+@media(min-width:640px){.goal-set .goal-form{grid-template-columns:1fr 1fr auto;align-items:end}}
+.goal-set .goal-form label{display:block;margin-bottom:6px;font:600 12px 'Poppins',sans-serif;color:var(--muted)}
+.goal-set .goal-form button{min-height:44px}
+.goal-msg{margin-top:8px;font-size:13px;color:var(--green);min-height:18px}
+.goal-msg.err{color:var(--danger)}
+.mread{margin:6px 0 14px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);font-size:14px}
+.mread b{color:var(--accent)}
+.mwrap{position:relative}
+.mplot{position:relative;height:300px;margin-top:24px;display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;align-items:end;border-bottom:1px solid var(--line)}
+@media(min-width:720px){.mplot{height:360px;gap:5px}}
+.mcol{position:relative;height:100%;display:flex;align-items:flex-end;min-width:0;cursor:pointer;border-radius:6px 6px 0 0}
+.mcol i{display:block;width:100%;height:var(--h);min-height:3px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent),#c98a14);transition:height .5s}
+.mcol.zero i{opacity:.3}
+.mcol.fut i{background:var(--line-soft);opacity:.6}
+.mcol.today i{background:linear-gradient(180deg,var(--green),#4c9a30)}
+.mcol.sel{background:#ffffff14;box-shadow:0 0 0 2px var(--info)}
+.mcol em{display:none;position:absolute;left:50%;bottom:calc(var(--h) + 3px);transform:translateX(-50%);font:600 10px 'Poppins',sans-serif;font-style:normal;color:var(--muted);white-space:nowrap;pointer-events:none}
+@media(min-width:720px){.mcol:not(.zero):not(.fut) em{display:block}}
+.mgoal{position:absolute;left:0;right:0;border-top:2px dashed var(--orange);pointer-events:none;z-index:2}
+.mgoal span{position:absolute;right:0;top:-20px;padding:0 6px;border-radius:6px;background:var(--bg);font:700 11px 'Poppins',sans-serif;color:var(--orange)}
+.mdays{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;margin-top:6px}
+@media(min-width:720px){.mdays{gap:5px}}
+.mdays span{font-size:11px;text-align:center;color:var(--muted)}
+.mdays span.today{color:var(--green);font-weight:700}
+@media(max-width:719px){.mdays span:nth-child(even):not(.today){visibility:hidden}}
+.mlegend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.mlegend i{display:inline-block;width:12px;height:12px;margin-right:6px;border-radius:3px;vertical-align:-1px}
 
 .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 .stat-box{min-width:0;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
@@ -669,6 +723,24 @@ details.fold[open]>summary::after{content:"−"}
         </div>
       </article>
     </div>
+    <section class="admin-box goals-card" id="goalsCard">
+      <div class="analytics-head"><div><span class="eyebrow">ACOMPANHAMENTO</span><h3>🎯 Metas e comparativos</h3></div><span class="live-dot">DADOS REAIS</span></div>
+      <div id="goalsBody"><div class="chart-empty">Carregando metas…</div></div>
+      <details class="fold goal-set" id="goalSet"><summary>⚙️ Definir metas</summary>
+        <div class="goal-form">
+          <div><label for="goalDailyIn">Meta diária (R$)</label><input id="goalDailyIn" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ex.: 800"></div>
+          <div><label for="goalMonthlyIn">Meta do mês (R$)</label><input id="goalMonthlyIn" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ex.: 20000"></div>
+          <button class="cost-btn" id="goalSave" type="button">Salvar metas</button>
+        </div>
+        <div class="goal-msg" id="goalMsg" aria-live="polite"></div>
+      </details>
+    </section>
+    <section class="admin-box month-card" id="monthChartCard">
+      <div class="analytics-head"><div><span class="eyebrow">MÊS INTEIRO</span><h3 id="monthChartTitle">📅 Faturamento do mês</h3></div><span class="live-dot">DADOS REAIS</span></div>
+      <div class="mread" id="mRead">Carregando…</div>
+      <div class="mwrap" id="mWrap"></div>
+      <div class="mlegend"><span><i style="background:var(--accent)"></i>Dia com vendas</span><span><i style="background:var(--green)"></i>Hoje</span><span><i style="background:var(--line-soft)"></i>Dias que ainda vêm</span><span><i style="background:var(--orange)"></i>Meta diária</span></div>
+    </section>
     <section class="admin-box" id="yearCard">
       <h3 style="margin:0 0 4px">📆 Faturamento do ano</h3>
       <small id="yearRange" style="color:#B7BEC9"></small>
@@ -697,7 +769,7 @@ details.fold[open]>summary::after{content:"−"}
       <p id="qtdPedidos">0 pedidos no período</p>
     </div>
     </details>
-    <details class="fold"><summary>📊 Gráficos</summary>
+    <details class="fold" open><summary>📊 Gráficos</summary>
     <section class="analytics-grid" aria-label="Gráficos do caixa">
       <article class="analytics-card"><div class="analytics-head"><div><span class="eyebrow">VISÃO DO PERÍODO</span><h3>📈 Faturamento por dia</h3></div><span class="live-dot">DADOS REAIS</span></div><div id="revenueChart" class="chart-area"><div class="chart-empty">Carregando dados do caixa…</div></div></article>
       <article class="analytics-card"><div class="analytics-head"><div><span class="eyebrow">DESEMPENHO</span><h3>🍔 Mais vendidos</h3></div></div><div id="itemsChart" class="chart-area"><div class="chart-empty">Aguardando pedidos do período…</div></div></article>
@@ -1926,7 +1998,7 @@ on conflict (code) do nothing;
     if(!orders || !orders.length){rev.innerHTML=empty;itemsEl.innerHTML=empty;payEl.innerHTML=empty;return;}
     const money=n=>fmt(n), byDay={};
     orders.forEach(o=>{const d=new Date(o.created_at);const key=d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",timeZone:"America/Santarem"});byDay[key]=(byDay[key]||0)+Number(o.total||0);});
-    const days=Object.entries(byDay).reverse().slice(-10), maxDay=Math.max(1,...days.map(x=>x[1]));
+    const days=Object.entries(byDay).reverse().slice(-31), maxDay=Math.max(1,...days.map(x=>x[1]));
     rev.innerHTML='<div class="chart-bars">'+days.map(([k,v])=>`<div class="chart-row"><span class="chart-label">${esc(k)}</span><div class="chart-track"><div class="chart-fill" style="width:${Math.max(1,v/maxDay*100)}%"></div></div><span class="chart-value">${money(v)}</span></div>`).join('')+'</div><div class="chart-foot">Faturamento agrupado pela data dos pedidos carregados neste período.</div>';
     const byItem={};orders.forEach(o=>(Array.isArray(o.items)?o.items:[]).forEach(i=>{const name=itemLabel(String(i.name||"Item"));byItem[name]=(byItem[name]||0)+Math.max(0,Number(i.qty)||0);}));
     const top=Object.entries(byItem).sort((a,b)=>b[1]-a[1]).slice(0,6), maxQty=Math.max(1,...top.map(x=>x[1]));
@@ -2202,6 +2274,7 @@ on conflict (code) do nothing;
     renderAnalytics(data);
     renderExtraStats(data, total);
     renderKpis(data, period);
+    loadGoals();
     lastOrders = data; lastRange = [startDate, endDate]; renderRanking(data); loadYear(period === "day" ? false : true);
 
 
@@ -2651,6 +2724,145 @@ on conflict (code) do nothing;
   cpEl("cpCancel").addEventListener("click", () => { cpResetForm(); cpMsg(""); });
   document.querySelector('[data-tab="cupons"]').addEventListener("click", loadCoupons);
   cpUpdateTypeUI();
+
+  // ======= METAS, COMPARATIVOS E GRÁFICO DO MÊS (Visão geral) =======
+  let goalDaily = 0, goalMonthly = 0, goalsLoaded = false, goalBusy = false, goalSel = null, goalState = null;
+  const G_OFF = 3 * 3600 * 1000; // Oriximiná = UTC-3
+  const G_WD = ["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
+  const G_MES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  const gKey = ms => new Date(ms - G_OFF).toISOString().slice(0, 10);
+  const gShort = v => v >= 1000 ? (v / 1000).toFixed(1).replace(".", ",") + "k" : String(Math.round(v));
+  function gDelta(cur, prev){
+    if (!(prev > 0)) return cur > 0 ? '<span class="gd up">▲ sem base</span>' : '<span class="gd flat">— sem dados</span>';
+    const p = (cur - prev) / prev * 100;
+    if (Math.abs(p) < 0.5) return '<span class="gd flat">▬ igual</span>';
+    return '<span class="gd ' + (p > 0 ? "up" : "down") + '">' + (p > 0 ? "▲ +" : "▼ −") + Math.abs(p).toFixed(0) + "%</span>";
+  }
+  function gGoalBlock(name, cur, goal, extra){
+    if (!(goal > 0)) return '<div class="gl-goal"><div class="gl-top"><span class="gl-name">' + name + '</span><span class="gl-val">' + fmt(cur) + '</span></div><div class="gl-track"><div class="gl-fill" style="width:0"></div></div><div class="gl-sub">Defina a meta em <b>⚙️ Definir metas</b> para ver o progresso.</div></div>';
+    const pct = cur / goal * 100, cls = pct >= 100 ? "done" : pct >= 50 ? "mid" : "";
+    return '<div class="gl-goal"><div class="gl-top"><span class="gl-name">' + name + '</span><span class="gl-val">' + fmt(cur) + ' <small>de ' + fmt(goal) + '</small></span></div>' +
+      '<div class="gl-track"><div class="gl-fill ' + cls + '" style="width:' + Math.min(100, Math.max(0.5, pct)).toFixed(1) + '%"></div></div>' +
+      '<div class="gl-sub"><b>' + pct.toFixed(0) + '%</b> da meta' + (pct >= 100 ? " — meta batida! 🎉" : " • faltam <b>" + fmt(goal - cur) + "</b>") + (extra || "") + '</div></div>';
+  }
+  function gReadout(){
+    const el = document.getElementById("mRead"); if (!el || !goalState) return;
+    const st = goalState, d = goalSel || st.d, v = st.vals[d - 1] || 0, n = st.counts[d - 1] || 0;
+    const wd = G_WD[new Date(Date.UTC(st.y, st.m, d)).getUTCDay()];
+    const dd = String(d).padStart(2, "0") + "/" + String(st.m + 1).padStart(2, "0");
+    let txt;
+    if (d > st.d) txt = "Dia <b>" + dd + "</b> (" + wd + ") ainda não chegou.";
+    else {
+      txt = "Dia <b>" + dd + "</b> (" + wd + "): <b>" + fmt(v) + "</b> em " + n + (n === 1 ? " pedido" : " pedidos");
+      if (st.goalD > 0) txt += " • " + (v / st.goalD * 100).toFixed(0) + "% da meta diária";
+    }
+    el.innerHTML = txt;
+    document.querySelectorAll("#mWrap .mcol").forEach(c => c.classList.toggle("sel", Number(c.dataset.d) === d));
+  }
+  function gRenderChart(){
+    const wrap = document.getElementById("mWrap"), st = goalState; if (!wrap || !st) return;
+    const mx = Math.max(1, st.goalD, ...st.vals) * 1.12;
+    let cols = "", days = "";
+    for (let i = 1; i <= st.dim; i++){
+      const v = st.vals[i - 1] || 0, fut = i > st.d, cls = (fut ? " fut" : "") + (i === st.d ? " today" : "") + (!fut && v <= 0 ? " zero" : "");
+      cols += '<div class="mcol' + cls + '" data-d="' + i + '" title="Dia ' + i + ": " + fmt(v) + '" style="--h:' + (v / mx * 100).toFixed(1) + '%"><em>' + gShort(v) + '</em><i></i></div>';
+      days += '<span class="' + (i === st.d ? "today" : "") + '">' + i + '</span>';
+    }
+    const goalLine = st.goalD > 0 ? '<div class="mgoal" style="bottom:' + (st.goalD / mx * 100).toFixed(1) + '%"><span>meta ' + gShort(st.goalD) + '</span></div>' : "";
+    wrap.innerHTML = '<div class="mplot" style="--n:' + st.dim + '">' + goalLine + cols + '</div><div class="mdays" style="--n:' + st.dim + '">' + days + '</div>';
+    document.getElementById("monthChartTitle").textContent = "📅 Faturamento de " + G_MES[st.m] + " de " + st.y + " — mês inteiro";
+    wrap.querySelector(".mplot").onclick = e => {
+      const c = e.target.closest(".mcol"); if (!c) return;
+      goalSel = Number(c.dataset.d); gReadout();
+    };
+    gReadout();
+  }
+  async function loadGoals(){
+    const body = document.getElementById("goalsBody"); if (!body || goalBusy) return;
+    goalBusy = true;
+    try{
+      const now = Date.now(), loc = new Date(now - G_OFF);
+      const y = loc.getUTCFullYear(), m = loc.getUTCMonth(), d = loc.getUTCDate();
+      const dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      const py = m === 0 ? y - 1 : y, pm = m === 0 ? 11 : m - 1;
+      const pdim = new Date(Date.UTC(py, pm + 1, 0)).getUTCDate();
+      const prevStart = Date.UTC(py, pm, 1) + G_OFF, monthStart = Date.UTC(y, m, 1) + G_OFF;
+      const todayStart = Date.UTC(y, m, d) + G_OFF, elapsed = now - todayStart;
+      const [ord, set] = await Promise.all([
+        fetchOrders(new Date(prevStart), null, "created_at,total"),
+        goalsLoaded ? Promise.resolve(null) : supabaseClient.from("settings").select("key,value").in("key", ["goal_daily", "goal_monthly"])
+      ]);
+      if (ord.error){ body.innerHTML = '<div class="empty-msg">⚠️ Não foi possível carregar os dados das metas.</div>'; return; }
+      if (set && !set.error){
+        (set.data || []).forEach(r => { const n = Number(r.value); if (r.key === "goal_daily") goalDaily = n > 0 ? n : 0; if (r.key === "goal_monthly") goalMonthly = n > 0 ? n : 0; });
+        goalsLoaded = true;
+        document.getElementById("goalDailyIn").value = goalDaily || "";
+        document.getElementById("goalMonthlyIn").value = goalMonthly || "";
+        if (!goalDaily && !goalMonthly) document.getElementById("goalSet").open = true;
+      }
+      const vals = new Array(dim).fill(0), counts = new Array(dim).fill(0);
+      let monthSoFar = 0, prevCut = 0, lwSame = 0, lwFull = 0, prevFull = 0;
+      const lwStart = todayStart - 7 * 86400000;
+      const prevCutMs = Math.min(Date.UTC(py, pm, d) + G_OFF + elapsed, Date.UTC(py, pm + 1, 1) + G_OFF);
+      (ord.data || []).forEach(o => {
+        const t = new Date(o.created_at).getTime(), v = Number(o.total || 0);
+        if (t >= monthStart){
+          const dayN = new Date(t - G_OFF).getUTCDate();
+          vals[dayN - 1] += v; counts[dayN - 1]++; monthSoFar += v;
+        } else {
+          prevFull += v;
+          if (t < prevCutMs) prevCut += v;
+        }
+        if (t >= lwStart && t < lwStart + 86400000){ lwFull += v; if (t < lwStart + elapsed) lwSame += v; }
+      });
+      const todaySoFar = vals[d - 1];
+      // projeção: dias fechados + hoje (o maior entre o que já vendeu e a média) + média nos dias que faltam
+      let sumDone = 0; for (let i = 0; i < d - 1; i++) sumDone += vals[i];
+      const done = d - 1, avg = done > 0 ? sumDone / done : 0;
+      const proj = done > 0 ? sumDone + Math.max(todaySoFar, avg) + avg * (dim - d) : null;
+      const remDays = dim - d + 1;
+      const needDay = goalMonthly > 0 ? Math.max(0, goalMonthly - monthSoFar) / remDays : 0;
+
+      const dailyBlock = gGoalBlock("META DE HOJE", todaySoFar, goalDaily, "");
+      const monthBlock = gGoalBlock("META DO MÊS", monthSoFar, goalMonthly, goalMonthly > 0 && monthSoFar < goalMonthly ? " • ritmo: <b>" + fmt(needDay) + "/dia</b>" : "");
+      const wdName = G_WD[new Date(Date.UTC(y, m, d)).getUTCDay()];
+      const boxHoje = '<div class="gl-box"><div class="k">HOJE × ' + wdName.toUpperCase() + ' PASSADA</div><div class="v">' + fmt(todaySoFar) + '</div>' + gDelta(todaySoFar, lwSame) +
+        '<div class="s">Mesmo horário na ' + wdName + ' passada: ' + fmt(lwSame) + ' (dia todo: ' + fmt(lwFull) + ')</div></div>';
+      const boxMes = '<div class="gl-box"><div class="k">MÊS × MÊS ANTERIOR</div><div class="v">' + fmt(monthSoFar) + '</div>' + gDelta(monthSoFar, prevCut) +
+        '<div class="s">' + G_MES[pm] + ' até o dia ' + Math.min(d, pdim) + ': ' + fmt(prevCut) + ' (mês todo: ' + fmt(prevFull) + ')</div></div>';
+      let projSub = "Precisa de ao menos 1 dia fechado no mês.";
+      if (proj !== null){
+        projSub = "Média de " + fmt(avg) + "/dia nos " + done + (done === 1 ? " dia fechado" : " dias fechados");
+        if (goalMonthly > 0) projSub += proj >= goalMonthly ? " • <b>acima da meta</b> em " + fmt(proj - goalMonthly) : " • <b>abaixo da meta</b> em " + fmt(goalMonthly - proj);
+        else if (prevFull > 0) projSub += " • mês passado fechou em " + fmt(prevFull);
+      }
+      const boxProj = '<div class="gl-box"><div class="k">PROJEÇÃO DO MÊS</div><div class="v">' + (proj === null ? "—" : fmt(proj)) + '</div>' + (proj !== null && prevFull > 0 ? gDelta(proj, prevFull) : "") + '<div class="s">' + projSub + '</div></div>';
+
+      body.innerHTML = '<div class="gl-meta">' + dailyBlock + monthBlock + '</div><div class="gl-cmp">' + boxHoje + boxMes + boxProj + '</div>';
+      goalState = { y, m, d, dim, vals, counts, goalD: goalDaily };
+      if (!goalSel || goalSel > dim) goalSel = d;
+      gRenderChart();
+    } catch(err){
+      body.innerHTML = '<div class="empty-msg">⚠️ Erro ao montar as metas: ' + esc(err.message || String(err)) + '</div>';
+    } finally { goalBusy = false; }
+  }
+  document.getElementById("goalSave").addEventListener("click", async () => {
+    const msg = document.getElementById("goalMsg"), btn = document.getElementById("goalSave");
+    const d = Number(document.getElementById("goalDailyIn").value || 0), m = Number(document.getElementById("goalMonthlyIn").value || 0);
+    msg.className = "goal-msg";
+    if (!(d >= 0) || !(m >= 0)){ msg.className = "goal-msg err"; msg.textContent = "As metas não podem ser negativas."; return; }
+    btn.disabled = true; msg.textContent = "Salvando...";
+    const now = new Date().toISOString();
+    const [a, b] = await Promise.all([
+      supabaseClient.from("settings").upsert({ key: "goal_daily", value: d, updated_at: now }, { onConflict: "key" }),
+      supabaseClient.from("settings").upsert({ key: "goal_monthly", value: m, updated_at: now }, { onConflict: "key" })
+    ]);
+    btn.disabled = false;
+    if (a.error || b.error){ msg.className = "goal-msg err"; msg.textContent = "Não foi possível salvar: " + (a.error || b.error).message; return; }
+    goalDaily = d; goalMonthly = m; goalsLoaded = true;
+    msg.textContent = "✅ Metas salvas!";
+    loadGoals();
+  });
 
 </script>
 </body>
