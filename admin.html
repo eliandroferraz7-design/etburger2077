@@ -506,11 +506,15 @@ details.fold[open]>summary::after{content:"−"}
 
 
 /* ---------- aba Custos (compras + CMV) ---------- */
-.cs-row{display:grid;grid-template-columns:minmax(0,1fr) 64px 104px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line-soft)}
+.cs-row{display:grid;grid-template-columns:minmax(0,1fr) 130px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line-soft)}
 .cs-row:last-child{border-bottom:0}
 .cs-name{font-weight:600;min-width:0;overflow-wrap:anywhere}
 .cs-name small{color:var(--muted);font-weight:400}
-.cs-row input{min-height:42px;padding:6px 8px;text-align:right}
+.cs-row input{min-height:44px;padding:6px 10px;text-align:right;font-size:16px;font-weight:600}
+.cs-imp textarea{min-height:150px;font:13px/1.5 monospace;margin-top:6px}
+.cs-impmsg{margin-top:8px;font-size:13px;line-height:1.5;color:var(--green)}
+.cs-impmsg.err{color:var(--danger)}
+.cs-impmsg small{display:block;color:var(--muted);margin-top:4px}
 .cs-sub{grid-column:1/-1;text-align:right;font-size:12px;color:var(--muted)}
 .cs-sub b{color:var(--accent)}
 .cs-total{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:12px;padding:14px;border-radius:14px;background:linear-gradient(135deg,#1b5d5c,#0f3739);border:1px solid #2f8a86}
@@ -571,7 +575,7 @@ details.fold[open]>summary::after{content:"−"}
   <div class="panel" id="panel-custos">
     <section class="promo-box">
       <h3>🛒 Calculadora de compras</h3>
-      <div class="hint">Digite o <b>valor</b> de cada insumo que vai comprar (e a quantidade, se for mais de 1). Deixe em branco o que não vai comprar. O total aparece no final.</div>
+      <div class="hint">Digite quanto você pretende <b>gastar</b> (R$) em cada insumo. Deixe em branco o que não vai comprar. O total aparece no final.</div>
       <div class="cs-budget">
         <div><label class="lbl" for="csBudget" style="display:block;margin-bottom:6px;font:600 12px 'Poppins',sans-serif;color:var(--muted)">Dinheiro que tenho (R$)</label><input id="csBudget" type="text" inputmode="decimal" placeholder="Ex.: 800"></div>
         <div class="cs-left" id="csLeft">Informe o dinheiro para ver a sobra</div>
@@ -585,9 +589,20 @@ details.fold[open]>summary::after{content:"−"}
       <div class="pm-msg" id="csShopMsg" aria-live="polite"></div>
     </section>
 
-    <details class="fold" id="csInsFold"><summary>🧺 Cadastro de insumos (nomes e preço da embalagem)</summary>
+    <details class="fold" id="csInsFold"><summary>🧺 Insumos: colar lista de preços e cadastro</summary>
       <div class="admin-box">
-        <div class="hint">Estes nomes aparecem na calculadora acima. Informe o que pagou na embalagem e quanto vem nela (ex.: caixa de blend R$ 180 com 30 un) para o sistema calcular o custo de cada unidade.</div>
+        <div class="cs-imp">
+          <div class="hint"><b>Colar lista de preços:</b> cole uma linha por insumo, com nome, quantidade comprada e preço. Exemplos:<br>
+          <code>Carne para blend 1kg 32,00</code><br><code>Mussarela 1kg R$ 40</code><br><code>Pão brioche 12 un 14,50</code><br>
+          Se o insumo já existe, só o preço é atualizado. Para blend de 120g, na receita você usa 120 (gramas).</div>
+          <textarea id="csImpText" placeholder="Carne para blend 1kg 32,00&#10;Mussarela 1kg 40,00&#10;Pão brioche 12 un 14,50"></textarea>
+          <div class="btn-row">
+            <button type="button" class="save-btn" id="csImpGo">📥 Importar lista</button>
+            <button type="button" class="refresh-btn" id="csImpCopy">📋 Copiar lista atual</button>
+          </div>
+          <div class="cs-impmsg" id="csImpMsg" aria-live="polite"></div>
+        </div>
+        <div class="hint" style="margin-top:14px">Ou ajuste um por um. Informe o que pagou, a quantidade comprada e a unidade (kg, g, l, ml, un ou fatia). O custo é calculado por grama/ml/unidade.</div>
         <div class="cs-head"><span>INSUMO</span><span>PREÇO PAGO</span><span>QTD</span><span>UNID.</span></div>
         <div id="csInsList"></div>
         <div class="btn-row">
@@ -3094,8 +3109,10 @@ on conflict (code) do nothing;
   // a mesma chave que a seção "Lucro e margem por lanche" já lê.
   (function(){
     const $ = id => document.getElementById(id);
-    const UNITS = ["un","g","ml","fatia","kg","l"];
-    const SEED = [["Pão brioche","un"],["Blend 120g","un"],["Mussarela","fatia"],["Presunto","fatia"],["Bacon","g"],["Calabresa","g"],["Ovo","un"],["Alface","g"],["Tomate","g"],["Maionese","g"],["Cebola","g"],["Batata congelada","g"],["Refri lata","un"],["Embalagem hambúrguer","un"],["Guardanapo / sacola","un"]];
+    const UNITS = ["kg","g","l","ml","un","fatia"];
+    const FACTOR = { kg: 1000, l: 1000 };
+    const baseU = u => u === "kg" ? "g" : u === "l" ? "ml" : u;
+    const SEED = [["Carne para blend","kg"],["Mussarela","kg"],["Presunto","kg"],["Bacon","kg"],["Calabresa","kg"],["Pão brioche","un"],["Ovo","un"],["Alface","un"],["Tomate","kg"],["Maionese","kg"],["Cebola","kg"],["Batata congelada","kg"],["Refri lata","un"],["Embalagem hambúrguer","un"],["Guardanapo / sacola","un"]];
     const EXTRA_PRODUCTS = [["fritas_p","Batata frita pequena",10],["fritas_m","Batata frita média",15],["fritas_g","Batata frita grande",20],["refri","Refri em lata",6],["refri220","Refri lata mini (220 ml)",4],["refri1l","Refrigerante 1 litro",10],["refri2l","Refrigerante 2 litros",15]];
     const LS = "etb_compras_v1";
     let ins = [], rec = {}, loaded = false, shop = {}, budget = "";
@@ -3105,7 +3122,7 @@ on conflict (code) do nothing;
     const num = t => { let s = String(t == null ? "" : t).trim().replace(/[^\d,.\-]/g, ""); if (!s) return NaN; if (s.includes(",")) s = s.replace(/\./g, "").replace(",", "."); const n = Number(s); return Number.isFinite(n) ? n : NaN; };
     const n0 = t => { const n = num(t); return Number.isFinite(n) ? n : 0; };
     const br = n => fmt(n);
-    const unitCost = i => { const q = n0(i.qty); return q > 0 ? n0(i.price) / q : 0; };
+    const unitCost = i => { const q = n0(i.qty) * (FACTOR[i.unit] || 1); return q > 0 ? n0(i.price) / q : 0; };
     const msg = (id, t, bad) => { const el = $(id); el.className = "pm-msg" + (bad ? " err" : ""); el.textContent = t || ""; };
     const lsGet = () => { try { const o = JSON.parse(localStorage.getItem(LS) || "{}"); shop = o.shop || {}; budget = o.budget || ""; } catch(e){} };
     const lsSet = () => { try { localStorage.setItem(LS, JSON.stringify({ shop, budget })); } catch(e){} };
@@ -3142,28 +3159,20 @@ on conflict (code) do nothing;
       return !error;
     }
 
-    // ---------- calculadora de compras ----------
+    // ---------- calculadora de compras (só o valor que pretende gastar) ----------
     function renderShop(){
       const box = $("csShopList");
       if (!ins.length){ box.innerHTML = '<div class="empty-msg">Cadastre os insumos para montar a lista.</div>'; calcShop(); return; }
-      box.innerHTML = ins.map(i => { const s = shop[i.id] || {}; return '<div class="cs-row" data-id="' + esc(i.id) + '">' +
-        '<div class="cs-name">' + esc(i.name) + ' <small>(' + esc(i.unit) + ')</small></div>' +
-        '<input class="cs-q" type="text" inputmode="decimal" placeholder="Qtd" value="' + esc(s.q || "") + '" aria-label="Quantidade de ' + esc(i.name) + '">' +
-        '<input class="cs-v" type="text" inputmode="decimal" placeholder="R$" value="' + esc(s.v || "") + '" aria-label="Valor de ' + esc(i.name) + '">' +
-        '<div class="cs-sub"></div></div>'; }).join("");
+      box.innerHTML = ins.map(i => '<div class="cs-row" data-id="' + esc(i.id) + '">' +
+        '<div class="cs-name">' + esc(i.name) + '</div>' +
+        '<input class="cs-v" type="text" inputmode="decimal" placeholder="R$ 0,00" value="' + esc((shop[i.id] || {}).v || "") + '" aria-label="Valor a gastar em ' + esc(i.name) + '"></div>').join("");
       calcShop();
     }
     function shopLines(){
-      return ins.map(i => { const s = shop[i.id] || {}, v = num(s.v), q = num(s.q); return { i, v, q: Number.isFinite(q) && q > 0 ? q : 1, has: Number.isFinite(v) && v > 0 }; }).filter(l => l.has);
+      return ins.map(i => ({ i, v: num((shop[i.id] || {}).v) })).filter(l => Number.isFinite(l.v) && l.v > 0);
     }
     function calcShop(){
-      let total = 0;
-      document.querySelectorAll("#csShopList .cs-row").forEach(row => {
-        const s = shop[row.dataset.id] || {}, v = num(s.v), q = num(s.q), qq = Number.isFinite(q) && q > 0 ? q : 1;
-        const sub = Number.isFinite(v) && v > 0 ? v * qq : 0;
-        total += sub;
-        row.querySelector(".cs-sub").innerHTML = sub ? (qq !== 1 ? qq + " × " + br(v) + " = " : "") + "<b>" + br(sub) + "</b>" : "";
-      });
+      const total = shopLines().reduce((a, l) => a + l.v, 0);
       $("csTotal").textContent = br(total);
       const b = num($("csBudget").value), left = $("csLeft");
       if (!Number.isFinite(b) || b <= 0){ left.className = "cs-left"; left.textContent = "Informe o dinheiro para ver a sobra"; return; }
@@ -3173,20 +3182,19 @@ on conflict (code) do nothing;
     }
     $("csShopList").addEventListener("input", e => {
       const row = e.target.closest(".cs-row"); if (!row) return;
-      const s = shop[row.dataset.id] || (shop[row.dataset.id] = {});
-      if (e.target.classList.contains("cs-q")) s.q = e.target.value; else s.v = e.target.value;
+      (shop[row.dataset.id] || (shop[row.dataset.id] = {})).v = e.target.value;
       lsSet(); calcShop();
     });
     $("csBudget").addEventListener("input", () => { budget = $("csBudget").value; lsSet(); calcShop(); });
     $("csClear").onclick = () => {
-      if (!confirm("Limpar todos os valores e quantidades da calculadora?")) return;
+      if (!confirm("Limpar todos os valores da calculadora?")) return;
       shop = {}; lsSet(); renderShop(); msg("csShopMsg", "Valores limpos.");
     };
     $("csCopy").onclick = async () => {
       const lines = shopLines();
       if (!lines.length){ msg("csShopMsg", "Digite o valor de ao menos um insumo.", true); return; }
-      let total = 0;
-      const txt = "🛒 COMPRAS ET BURGER 2077\n" + lines.map(l => { const sub = l.v * l.q; total += sub; return "• " + l.i.name + ": " + (l.q !== 1 ? l.q + " × " + br(l.v) + " = " : "") + br(sub); }).join("\n") + "\n\nTOTAL: " + br(total);
+      const total = lines.reduce((a, l) => a + l.v, 0);
+      const txt = "🛒 COMPRAS ET BURGER 2077\n" + lines.map(l => "• " + l.i.name + ": " + br(l.v)).join("\n") + "\n\nTOTAL: " + br(total);
       try { await navigator.clipboard.writeText(txt); msg("csShopMsg", "✅ Lista copiada!"); }
       catch(e){ msg("csShopMsg", "Não foi possível copiar automaticamente neste navegador.", true); }
     };
@@ -3204,7 +3212,8 @@ on conflict (code) do nothing;
     function updateUc(i){
       const row = document.querySelector('#csInsList [data-id="' + i.id + '"]'); if (!row) return;
       const c = unitCost(i);
-      row.querySelector(".ci-uc").textContent = c > 0 ? "Custo por " + i.unit + ": " + fmt4(c) : "Informe preço pago e quantidade para calcular o custo unitário";
+      const bu = baseU(i.unit), h = bu === "g" || bu === "ml";
+      row.querySelector(".ci-uc").textContent = c > 0 ? "Custo por " + bu + ": " + fmt4(c) + (h ? " · 120 " + bu + " = " + br(c * 120) : "") : "Informe preço pago e quantidade para calcular o custo";
     }
     const fmt4 = n => "R$ " + (n >= 1 ? n.toFixed(2) : n.toFixed(4)).replace(".", ",");
     $("csInsList").addEventListener("input", e => {
@@ -3235,6 +3244,49 @@ on conflict (code) do nothing;
       msg("csInsMsg", "✅ Insumos salvos." + (synced ? " CMV de " + synced + " produto(s) atualizado." : ""));
     };
 
+    // ---------- colar lista de preços ----------
+    const UMAP = { kg:"kg", kilo:"kg", kilos:"kg", quilo:"kg", quilos:"kg", g:"g", grama:"g", gramas:"g", l:"l", litro:"l", litros:"l", ml:"ml", un:"un", und:"un", unid:"un", unidade:"un", unidades:"un", fatia:"fatia", fatias:"fatia" };
+    function parseLine(raw){
+      let t = String(raw).replace(/R\$/gi, " ").replace(/^[\s\-•*·]+/, "").replace(/[\t;|]+/g, "  ").trim();
+      if (!t) return null;
+      let qty = 1, unit = "un", m = t.match(/(\d+(?:[.,]\d+)?)\s*(kg|kilos?|quilos?|gramas?|g|ml|litros?|l|unidades?|unid|und|un|fatias?)(?![a-zà-ú])/i);
+      if (m){ qty = num(m[1]) || 1; unit = UMAP[m[2].toLowerCase()] || "un"; t = t.replace(m[0], " "); }
+      else { const k = t.match(/\b(kg|kilo|quilo|litro)\b/i); if (k){ unit = UMAP[k[1].toLowerCase()]; t = t.replace(k[0], " "); } }
+      const nums = [...t.matchAll(/\d{1,3}(?:\.\d{3})*,\d{1,2}|\d+(?:[.,]\d+)?/g)];
+      if (!nums.length) return null;
+      const last = nums[nums.length - 1], price = num(last[0]);
+      if (!(price > 0)) return null;
+      t = (t.slice(0, last.index) + " " + t.slice(last.index + last[0].length)).replace(/[\-–—:=|;,]+/g, " ").replace(/\b(por|o|a|de|no|na|cada)\s*$/i, "").replace(/\s+/g, " ").trim();
+      if (t.length < 2) return null;
+      return { name: t, price, qty, unit };
+    }
+    function impMsg(html, bad){ const el = $("csImpMsg"); el.className = "cs-impmsg" + (bad ? " err" : ""); el.innerHTML = html; }
+    $("csImpGo").onclick = async () => {
+      const lines = $("csImpText").value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+      if (!lines.length){ impMsg("Cole a lista de preços na caixa acima.", true); return; }
+      let added = 0, upd = 0; const bad = [];
+      const next = ins.map(i => Object.assign({}, i));
+      lines.forEach(l => {
+        const r = parseLine(l); if (!r){ bad.push(l); return; }
+        const ex = next.find(i => pmNorm(i.name) === pmNorm(r.name));
+        if (ex){ ex.price = r.price; ex.qty = r.qty; ex.unit = r.unit; upd++; }
+        else { next.push({ id: uid(), name: r.name, price: r.price, qty: r.qty, unit: r.unit }); added++; }
+      });
+      if (!added && !upd){ impMsg("Não consegui entender nenhuma linha. Use: <b>nome quantidade preço</b>, por exemplo <code>Carne para blend 1kg 32,00</code>.", true); return; }
+      const btn = $("csImpGo"); btn.disabled = true; impMsg("Importando...");
+      const clean = next.filter(i => String(i.name).trim()).map(i => ({ id: i.id, name: String(i.name).trim(), price: n0(i.price) || "", qty: n0(i.qty) || "", unit: i.unit }));
+      const ok = await saveKey("cost_insumos", clean);
+      btn.disabled = false;
+      if (!ok){ impMsg("Não foi possível salvar. Confira as permissões da tabela settings.", true); return; }
+      ins = clean; await syncAllCosts(); renderAll(); $("csImpText").value = "";
+      impMsg("✅ " + added + " novo(s), " + upd + " atualizado(s)." + (bad.length ? "<small>Não entendi " + bad.length + " linha(s): " + bad.slice(0, 4).map(esc).join(" | ") + (bad.length > 4 ? " ..." : "") + "</small>" : ""));
+    };
+    $("csImpCopy").onclick = async () => {
+      const txt = ins.filter(i => i.name).map(i => i.name + " " + (n0(i.qty) || 1) + " " + i.unit + " " + (n0(i.price) ? n0(i.price).toFixed(2).replace(".", ",") : "0,00")).join("\n");
+      try { await navigator.clipboard.writeText(txt); impMsg("✅ Lista copiada. Edite os preços onde quiser e cole de volta em “Importar lista”."); }
+      catch(e){ $("csImpText").value = txt; impMsg("Não deu para copiar sozinho: a lista foi colocada na caixa acima, copie de lá."); }
+    };
+
     // ---------- receita / CMV ----------
     function recipeCost(rows){
       let c = 0, miss = 0;
@@ -3254,7 +3306,7 @@ on conflict (code) do nothing;
       const box = $("csRecipe");
       if (!ins.length){ box.innerHTML = '<div class="empty-msg">Cadastre insumos primeiro.</div>'; $("csSum").innerHTML = ""; return; }
       box.innerHTML = draft.length ? draft.map((r, k) => '<div class="cs-rrow" data-k="' + k + '">' +
-        '<select class="cr-ing" aria-label="Insumo">' + (ins.some(x => x.id === r.ing) ? "" : '<option value="">(insumo removido)</option>') + ins.map(i => '<option value="' + esc(i.id) + '"' + (i.id === r.ing ? " selected" : "") + '>' + esc(i.name) + ' (' + esc(i.unit) + ')</option>').join("") + '</select>' +
+        '<select class="cr-ing" aria-label="Insumo">' + (ins.some(x => x.id === r.ing) ? "" : '<option value="">(insumo removido)</option>') + ins.map(i => '<option value="' + esc(i.id) + '"' + (i.id === r.ing ? " selected" : "") + '>' + esc(i.name) + ' (' + esc(baseU(i.unit)) + ')</option>').join("") + '</select>' +
         '<input class="cr-q" type="text" inputmode="decimal" value="' + esc(r.q || "") + '" placeholder="Qtd" aria-label="Quantidade usada">' +
         '<button type="button" class="mini-btn cr-del" aria-label="Remover">✕</button>' +
         '<div class="cs-rc"></div></div>').join("") : '<div class="empty-msg">Nenhum insumo nesta receita ainda. Clique em “Adicionar insumo à receita”.</div>';
@@ -3263,7 +3315,7 @@ on conflict (code) do nothing;
     function calcRecipe(){
       document.querySelectorAll("#csRecipe .cs-rrow").forEach(row => {
         const r = draft[Number(row.dataset.k)], i = ins.find(x => x.id === r.ing);
-        row.querySelector(".cs-rc").textContent = i ? n0(r.q) + " " + i.unit + " × " + fmt4(unitCost(i)) + " = " + fmt4(unitCost(i) * n0(r.q)) : "Insumo não encontrado";
+        row.querySelector(".cs-rc").textContent = i ? n0(r.q) + " " + baseU(i.unit) + " × " + fmt4(unitCost(i)) + " = " + fmt4(unitCost(i) * n0(r.q)) : "Insumo não encontrado";
       });
       const p = products().find(x => x.id === curProd); if (!p) return;
       const { cost } = recipeCost(draft);
